@@ -3,6 +3,8 @@ import 'pages/beranda.dart';
 import 'pages/data.dart';
 import 'pages/berita.dart';
 import 'pages/akun.dart';
+import 'pages/data/users/index.dart';
+import 'pages/data/services/index.dart';
 
 class PerangkatDesaMain extends StatefulWidget {
   const PerangkatDesaMain({super.key});
@@ -13,25 +15,59 @@ class PerangkatDesaMain extends StatefulWidget {
 
 class _PerangkatDesaMainState extends State<PerangkatDesaMain> {
   int _selectedIndex = 0;
-
-  final List<Widget> _pages = const [
-    BerandaPage(),
-    DataMasterPage(),
-    BeritaPage(),
-    AkunPage(),
-  ];
+  bool _showUsersPage = false;
+  bool _showServicesPage = false;
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
+      _showServicesPage = false;
+    });
+  }
+
+  void _openUsersPage() {
+    setState(() {
+      _showUsersPage = true;
+    });
+  }
+
+  void _openServicesPage() {
+    setState(() {
+      _showServicesPage = true;
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final pages = [
+      const BerandaPage(),
+      DataMasterPage(
+        onOpenUsers: _openUsersPage,
+        onOpenServices: _openServicesPage,
+      ),
+      const BeritaPage(),
+      const AkunPage(),
+    ];
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F6FF),
-      body: _pages[_selectedIndex],
+      body: _showUsersPage
+        ? UsersIndexPage(
+            onBack: () {
+              setState(() {
+                _showUsersPage = false;
+              });
+            },
+          )
+        : _showServicesPage
+            ? ServicesIndexPage(
+                onBack: () {
+                  setState(() {
+                    _showServicesPage = false;
+                  });
+                },
+              )
+            : pages[_selectedIndex],
+
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         backgroundColor: Colors.white,

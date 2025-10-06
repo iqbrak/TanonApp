@@ -1,8 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+typedef OpenServicesCallback = void Function();
+typedef OpenUsersCallback = void Function();
+
 class DataMasterPage extends StatelessWidget {
-  const DataMasterPage({super.key});
+  final OpenServicesCallback onOpenServices;
+  final OpenUsersCallback onOpenUsers;
+
+  const DataMasterPage({
+    super.key,
+    required this.onOpenServices,
+    required this.onOpenUsers,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +31,6 @@ class DataMasterPage extends StatelessWidget {
               ),
             ),
           ),
-
           Positioned(
             top: 20,
             left: 0,
@@ -37,9 +46,8 @@ class DataMasterPage extends StatelessWidget {
               ),
             ),
           ),
-
           SingleChildScrollView(
-            padding: const EdgeInsets.only(top: 70), 
+            padding: const EdgeInsets.only(top: 70),
             child: Column(
               children: [
                 Padding(
@@ -51,10 +59,9 @@ class DataMasterPage extends StatelessWidget {
                     color: const Color(0xFFCEDDFF),
                     buttonColor: const Color(0xFF00194A),
                     buttonTextColor: Colors.white,
-                    onPressed: () {},
+                    onPressed: onOpenUsers,
                   ),
                 ),
-
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                   child: _buildDataCard(
@@ -64,10 +71,9 @@ class DataMasterPage extends StatelessWidget {
                     color: const Color(0xFF4E82EA),
                     buttonColor: const Color(0xFFCEDDFF),
                     buttonTextColor: const Color(0xFF01002E),
-                    onPressed: () {},
+                    onPressed: onOpenServices, 
                   ),
                 ),
-
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                   child: _buildDataCard(
@@ -80,7 +86,6 @@ class DataMasterPage extends StatelessWidget {
                     onPressed: () {},
                   ),
                 ),
-
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                   child: _buildDataCard(
@@ -93,7 +98,6 @@ class DataMasterPage extends StatelessWidget {
                     onPressed: () {},
                   ),
                 ),
-
                 const SizedBox(height: 20),
               ],
             ),
@@ -168,10 +172,7 @@ class DataMasterPage extends StatelessWidget {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(30),
                         ),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 10,
-                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                       ),
                       child: Text(
                         'Check',
