@@ -2,7 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class BeritaPage extends StatelessWidget {
-  const BeritaPage({super.key});
+  final VoidCallback onOpenDetail;
+
+  const BeritaPage({
+    super.key,
+    required this.onOpenDetail,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +37,7 @@ class BeritaPage extends StatelessWidget {
                     Text(
                       'Portal Berita Desa Tanon',
                       style: GoogleFonts.poppins(
-                        color: Color(0xFF00194A),
+                        color: const Color(0xFF00194A),
                         fontSize: 24,
                         fontWeight: FontWeight.w600,
                       ),
@@ -66,7 +71,8 @@ class BeritaPage extends StatelessWidget {
                               color: const Color(0xFF4E82EA),
                               borderRadius: BorderRadius.circular(20),
                             ),
-                            child: const Icon(Icons.filter_list, color: Colors.white),
+                            child:
+                                const Icon(Icons.filter_list, color: Colors.white),
                           ),
                         ],
                       ),
@@ -83,13 +89,20 @@ class BeritaPage extends StatelessWidget {
               child: ListView.builder(
                 itemCount: 10,
                 itemBuilder: (context, index) {
+                  final berita = {
+                    'image': 'assets/images/berita.png',
+                    'title':
+                        'Judul Berita Pengumuman Dana Bansos Periode Juli 2025 Telah ada ${index + 1}',
+                    'tanggal': '06 Okt 2025, 12:00',
+                    'isi':
+                        'Isi lengkap berita ke-${index + 1}. Ini adalah contoh isi berita yang akan tampil di halaman detail.'
+                  };
+
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 10.0),
-                    child: _buildBeritaCard(
-                      image: 'assets/images/berita.png',
-                      title:
-                          'Judul Berita Pengumuman Dana Bansos Periode Juli 2025 Telah ada ${index + 1}',
-                      tanggal: '06 Okt 2025, 12:00',
+                    child: GestureDetector(
+                      onTap: onOpenDetail,
+                      child: _buildBeritaCard(context, berita),
                     ),
                   );
                 },
@@ -101,11 +114,7 @@ class BeritaPage extends StatelessWidget {
     );
   }
 
-  Widget _buildBeritaCard({
-    required String image,
-    required String title,
-    required String tanggal,
-  }) {
+  Widget _buildBeritaCard(BuildContext context, Map<String, dynamic> berita) {
     return Container(
       height: 100,
       decoration: BoxDecoration(
@@ -127,8 +136,8 @@ class BeritaPage extends StatelessWidget {
               flex: 1,
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(5),
-                child: Image.network(
-                  image,
+                child: Image.asset(
+                  berita['image'],
                   width: double.infinity,
                   height: double.infinity,
                   fit: BoxFit.cover,
@@ -143,7 +152,7 @@ class BeritaPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    title,
+                    berita['title'],
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.poppins(
@@ -154,7 +163,7 @@ class BeritaPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    tanggal,
+                    berita['tanggal'],
                     style: GoogleFonts.poppins(
                       fontSize: 10,
                       fontWeight: FontWeight.w400,

@@ -42,20 +42,43 @@ class UsersIndexPage extends StatelessWidget {
       body: Stack(
         children: [
           SingleChildScrollView(
-            padding: const EdgeInsets.only(top: 60, bottom: 80),
+            padding: const EdgeInsets.only(top: 65, bottom: 80),
             child: Column(
-              children: dummyData.map((item) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: _buildExpandableCard(
-                    context,
-                    id: item["id"],
-                    name: item["name"],
-                    email: item["email"],
-                    role: item["role"],
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: TextField(
+                    decoration: InputDecoration(
+                      hintText: 'Cari pengguna...',
+                      prefixIcon: const Icon(Icons.search, color: Color(0xFF00194A)),
+                      filled: true,
+                      fillColor: Colors.white,
+                      contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15),
+                        borderSide: const BorderSide(color: Color(0xFF00194A), width: 1.5),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15),
+                        borderSide: const BorderSide(color: Color(0xFF00194A), width: 1.5),
+                      ),
+                    ),
                   ),
-                );
-              }).toList(),
+                ),
+                const SizedBox(height: 16),
+                ...dummyData.map((item) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    child: _buildExpandableCard(
+                      context,
+                      id: item["id"],
+                      name: item["name"],
+                      email: item["email"],
+                      role: item["role"],
+                    ),
+                  );
+                }).toList(),
+              ],
             ),
           ),
           Positioned(
@@ -124,7 +147,7 @@ class UsersIndexPage extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8),
             image: const DecorationImage(
-              image: AssetImage('assets/images/list-users.png'), 
+              image: AssetImage('assets/images/list-users.png'),
               fit: BoxFit.cover,
             ),
           ),
