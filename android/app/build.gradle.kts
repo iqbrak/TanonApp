@@ -5,8 +5,8 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
-android {
-    namespace = "com.example.etanonapp"
+android {com.exam
+    namespace = "ple.etanonapp"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
