@@ -1,6 +1,11 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
 
 import 'modules/perangkat_desa/pd_main.dart';
+
+import 'modules/auth/login.dart';
+import 'modules/auth/register.dart';
+import 'modules/auth/forgot_password.dart';
 
 import 'modules/perangkat_desa/pages/pd_beranda.dart';
 import 'modules/perangkat_desa/pages/pd_data.dart';
@@ -18,27 +23,91 @@ import 'modules/perangkat_desa/pages/pd_data_requests.dart';
 import 'modules/perangkat_desa/pages/pd_berita_detail.dart';
 
 final GoRouter appRouter = GoRouter(
-  initialLocation: '/pd/beranda',
+  initialLocation: '/auth/login',
+  redirect: (context, state) {
+    final user = FirebaseAuth.instance.currentUser;
+    final loggingIn = state.uri.path == '/auth/login' ||
+        state.uri.path == '/auth/register' ||
+        state.uri.path == '/auth/forgot-password';
+
+    if (user == null && !loggingIn) return '/auth/login';
+    if (user != null && !user.emailVerified && !loggingIn) {
+      return '/auth/login';
+    }
+    if (user != null && user.emailVerified && loggingIn) return '/pd/beranda';
+
+    return null;
+  },
   routes: [
+    GoRoute(
+      path: '/auth/login',
+      builder: (_, __) => const LoginPage(),
+    ),
+    GoRoute(
+      path: '/auth/register',
+      builder: (_, __) => const RegisterPage(),
+    ),
+    GoRoute(
+      path: '/auth/forgot-password',
+      builder: (_, __) => const ForgotPasswordPage(),
+    ),
     ShellRoute(
       builder: (context, state, child) => PerangkatDesaMain(child: child),
       routes: [
-        GoRoute(path: '/pd/beranda', builder: (_, __) => const DesaBerandaPage()),
-        GoRoute(path: '/pd/data', builder: (_, __) => const DesaDataPage()),
-        GoRoute(path: '/pd/berita', builder: (_, __) => const DesaBeritaPage()),
-        GoRoute(path: '/pd/akun', builder: (_, __) => const DesaAkunPage()),
-
-        GoRoute(path: '/pd/data/users', builder: (_, __) => const DesaDataUsersPage()),
-        GoRoute(path: '/pd/data/users/add', builder: (_, __) => const DesaDataUsersAddPage()),
-        GoRoute(path: '/pd/data/users/edit', builder: (_, __) => const DesaDataUsersEditPage()),
-
-        GoRoute(path: '/pd/data/services', builder: (_, __) => const DesaDataServicesPage()),
-        GoRoute(path: '/pd/data/services/add', builder: (context, state) => const DesaDataServicesFormPage()),
-        GoRoute(path: '/pd/data/services/edit', builder: (context, state) => DesaDataServicesFormPage(id: state.uri.queryParameters['id'],)),
-
-        GoRoute(path: '/pd/data/news', builder: (_, __) => const DesaDataNewsPage()),
-        GoRoute(path: '/pd/data/requests', builder: (_, __) => const DesaDataRequestsPage()),
-        GoRoute(path: '/pd/berita/detail', builder: (_, __) => const DesaBeritaDetailPage()),
+        GoRoute(
+          path: '/pd/beranda',
+          builder: (_, __) => const DesaBerandaPage(),
+        ),
+        GoRoute(
+          path: '/pd/data',
+          builder: (_, __) => const DesaDataPage(),
+        ),
+        GoRoute(
+          path: '/pd/berita',
+          builder: (_, __) => const DesaBeritaPage(),
+        ),
+        GoRoute(
+          path: '/pd/akun',
+          builder: (_, __) => const DesaAkunPage(),
+        ),
+        GoRoute(
+          path: '/pd/data/users',
+          builder: (_, __) => const DesaDataUsersPage(),
+        ),
+        GoRoute(
+          path: '/pd/data/users/add',
+          builder: (_, __) => const DesaDataUsersAddPage(),
+        ),
+        GoRoute(
+          path: '/pd/data/users/edit',
+          builder: (context, state) => DesaDataUsersEditPage(),
+        ),
+        GoRoute(
+          path: '/pd/data/services',
+          builder: (_, __) => const DesaDataServicesPage(),
+        ),
+        GoRoute(
+          path: '/pd/data/services/add',
+          builder: (_, __) => const DesaDataServicesFormPage(),
+        ),
+        GoRoute(
+          path: '/pd/data/services/edit',
+          builder: (context, state) => DesaDataServicesFormPage(
+            id: state.uri.queryParameters['id'],
+          ),
+        ),
+        GoRoute(
+          path: '/pd/data/news',
+          builder: (_, __) => const DesaDataNewsPage(),
+        ),
+        GoRoute(
+          path: '/pd/data/requests',
+          builder: (_, __) => const DesaDataRequestsPage(),
+        ),
+        GoRoute(
+          path: '/pd/berita/detail',
+          builder: (_, __) => const DesaBeritaDetailPage(),
+        ),
       ],
     ),
   ],

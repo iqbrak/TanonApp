@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/controllers/auth_controller.dart';
+import 'package:go_router/go_router.dart';
 
 class DesaAkunPage extends StatelessWidget {
   const DesaAkunPage({super.key});
@@ -96,10 +98,15 @@ class DesaAkunPage extends StatelessWidget {
               height: 50,
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Berhasil logout')),
-                  );
+                onPressed: () async {
+                  final authController = AuthController();
+                    await authController.logout();
+                    if (context.mounted) {
+                      context.go('/auth/login');
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Berhasil logout')),
+                      );
+                    }
                 },
                 icon: const Icon(Icons.logout, color: Colors.white),
                 label: Text(
