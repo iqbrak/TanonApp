@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "997818014466",
-    "project_id": "github-images-b8fe4",
-    "storage_bucket": "github-images-b8fe4.appspot.com"
+    "project_number": "615335774911",
+    "project_id": "lepi-store-app",
+    "storage_bucket": "lepi-store-app.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:997818014466:android:f8ac3a30ec457df5dc001b",
+        "mobilesdk_app_id": "1:615335774911:android:4eca74b006e4de6589540a",
         "android_client_info": {
           "package_name": "com.example.etanonapp"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDy-OG3PSIq1vkW9MQsizZhwzdqpoIiDqs"
+          "current_key": "AIzaSyAQ6YCCoMJkOvYzCGE28yvkhWZAQulEh3w"
         }
       ],
       "services": {
@@ -26,15 +26,15 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:997818014466:android:6497102cc7a788ebdc001b",
+        "mobilesdk_app_id": "1:615335774911:android:4ff7f36185a4e0fd89540a",
         "android_client_info": {
-          "package_name": "com.example.etanonapp1"
+          "package_name": "com.example.lepi_store"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDy-OG3PSIq1vkW9MQsizZhwzdqpoIiDqs"
+          "current_key": "AIzaSyAQ6YCCoMJkOvYzCGE28yvkhWZAQulEh3w"
         }
       ],
       "services": {

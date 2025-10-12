@@ -1,9 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../../core/controllers/service_controller.dart';
+import '../../../../../core/models/service.dart';
 
-class DesaDataPage extends StatelessWidget {
+class DesaDataPage extends StatefulWidget {
   const DesaDataPage({super.key});
+
+  @override
+  State<DesaDataPage> createState() => _DesaDataPageState();
+}
+
+class _DesaDataPageState extends State<DesaDataPage> {
+  final controller = ServiceController();
 
   @override
   Widget build(BuildContext context) {
@@ -53,16 +62,23 @@ class DesaDataPage extends StatelessWidget {
                     onPressed: () => context.go('/pd/data/users'),
                   ),
                 ),
+                
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                  child: _buildDataCard(
-                    title: 'Data Keperluan',
-                    iconPath: 'assets/images/ic_services.png',
-                    total: 25,
-                    color: const Color(0xFF4E82EA),
-                    buttonColor: const Color(0xFFCEDDFF),
-                    buttonTextColor: const Color(0xFF01002E),
-                    onPressed: () => context.go('/pd/data/services'),
+                  child: StreamBuilder<List<Service>>(
+                    stream: controller.getServicesStream(),
+                    builder: (context, snapshot) {
+                      final total = snapshot.data?.length ?? 0;
+                      return _buildDataCard(
+                        title: 'Data Keperluan',
+                        iconPath: 'assets/images/ic_services.png',
+                        total: total,
+                        color: const Color(0xFF4E82EA),
+                        buttonColor: const Color(0xFFCEDDFF),
+                        buttonTextColor: const Color(0xFF01002E),
+                        onPressed: () => context.go('/pd/data/services'),
+                      );
+                    },
                   ),
                 ),
                 Padding(
