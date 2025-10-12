@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "997818014466",
+    "project_id": "github-images-b8fe4",
+    "storage_bucket": "github-images-b8fe4.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:997818014466:android:f8ac3a30ec457df5dc001b",
+        "android_client_info": {
+          "package_name": "com.example.etanonapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDy-OG3PSIq1vkW9MQsizZhwzdqpoIiDqs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:997818014466:android:6497102cc7a788ebdc001b",
+        "android_client_info": {
+          "package_name": "com.example.etanonapp1"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDy-OG3PSIq1vkW9MQsizZhwzdqpoIiDqs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
