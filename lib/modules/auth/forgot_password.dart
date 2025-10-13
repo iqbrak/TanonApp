@@ -23,25 +23,6 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     super.dispose();
   }
 
-  Future<void> _resetPassword() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    setState(() => isLoading = true);
-
-    final error = await authController.resetPassword(emailController.text);
-
-    setState(() => isLoading = false);
-
-    if (error != null) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error)));
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Link reset password telah dikirim ke email Anda.')),
-      );
-      context.go('/auth/login');
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -55,10 +36,13 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
               const SizedBox(height: 20),
               Text('Lupa Password?',
                   style: GoogleFonts.poppins(
-                      fontSize: 20, fontWeight: FontWeight.w600, color: const Color(0xFF00194A))),
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFF00194A))),
               const SizedBox(height: 8),
               Text('Masukkan email untuk reset password',
-                  style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey)),
+                  style:
+                      GoogleFonts.poppins(fontSize: 14, color: Colors.grey)),
               const SizedBox(height: 30),
               Form(
                 key: _formKey,
@@ -66,28 +50,37 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   controller: emailController,
                   decoration: InputDecoration(
                     labelText: 'Email',
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                    border:
+                        OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                     filled: true,
                     fillColor: Colors.white,
                   ),
-                  validator: (val) => val!.isEmpty ? 'Email tidak boleh kosong' : null,
+                  validator: (val) =>
+                      val!.isEmpty ? 'Email tidak boleh kosong' : null,
                 ),
               ),
               const SizedBox(height: 24),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: _resetPassword,
+                  onPressed: () => authController.handleResetPassword(
+                    context: context,
+                    formKey: _formKey,
+                    emailController: emailController,
+                    setLoading: (v) => setState(() => isLoading = v),
+                  ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF245BCA),
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
                   ),
                   child: isLoading
                       ? const CircularProgressIndicator(color: Colors.white)
                       : Text('Reset Password',
                           style: GoogleFonts.poppins(
-                              fontWeight: FontWeight.w600, color: Colors.white)),
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white)),
                 ),
               ),
               const SizedBox(height: 16),
@@ -97,7 +90,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   const Text('Ingat password? '),
                   GestureDetector(
                     onTap: () => context.go('/auth/login'),
-                    child: const Text('Login', style: TextStyle(color: Colors.blue)),
+                    child: const Text('Login',
+                        style: TextStyle(color: Colors.blue)),
                   ),
                 ],
               ),

@@ -27,31 +27,6 @@ class _RegisterPageState extends State<RegisterPage> {
     super.dispose();
   }
 
-  Future<void> _register() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    setState(() => isLoading = true);
-
-    final error = await authController.register(
-      username: usernameController.text,
-      email: emailController.text,
-      password: passwordController.text,
-    );
-
-    setState(() => isLoading = false);
-
-    if (error != null) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(error)));
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Registrasi berhasil! Cek email untuk verifikasi.')),
-      );
-      context.go('/auth/login');
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -139,7 +114,14 @@ class _RegisterPageState extends State<RegisterPage> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: _register,
+                  onPressed: () => authController.handleRegister(
+                    context: context,
+                    formKey: _formKey,
+                    usernameController: usernameController,
+                    emailController: emailController,
+                    passwordController: passwordController,
+                    setLoading: (v) => setState(() => isLoading = v),
+                  ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF245BCA),
                     padding: const EdgeInsets.symmetric(vertical: 14),

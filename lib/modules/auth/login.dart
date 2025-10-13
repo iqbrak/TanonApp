@@ -35,25 +35,6 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  Future<void> _login() async {
-    if (!_formKey.currentState!.validate()) return;
-    setState(() => isLoading = true);
-
-    final error = await authController.login(
-      email: emailController.text,
-      password: passwordController.text,
-    );
-
-    setState(() => isLoading = false);
-
-    if (error != null) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(error)));
-    } else {
-      context.go('/pd/beranda');
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -140,7 +121,13 @@ class _LoginPageState extends State<LoginPage> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: _login,
+                  onPressed: () => authController.handleLogin(
+                    context: context,
+                    formKey: _formKey,
+                    emailController: emailController,
+                    passwordController: passwordController,
+                    setLoading: (v) => setState(() => isLoading = v),
+                  ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF245BCA),
                     padding: const EdgeInsets.symmetric(vertical: 14),
