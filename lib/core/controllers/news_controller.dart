@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:flutter/material.dart';
 import '../models/news.dart';
 import 'package:uuid/uuid.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -26,6 +25,12 @@ class NewsController {
 
       return list;
     });
+  }
+
+  Stream<List<News>> getPublishedNewsStream() {
+    return getNewsStream().map(
+      (list) => list.where((news) => news.publishedAt != null).toList(),
+    );
   }
 
   Stream<List<News>> getFilteredNewsStream(String keyword) {

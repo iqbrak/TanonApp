@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/controllers/news_controller.dart';
+import '../../../core/models/news.dart';
 
 class DesaBeritaPage extends StatelessWidget {
-  const DesaBeritaPage({super.key});
+  final NewsController _newsController = NewsController();
+  
+  DesaBeritaPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -82,22 +86,29 @@ class DesaBeritaPage extends StatelessWidget {
           Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: ListView.builder(
-                itemCount: 10,
-                itemBuilder: (context, index) {
-                  final berita = {
-                    'image': 'assets/images/berita.png',
-                    'title':
-                        'Judul Berita Pengumuman Dana Bansos Periode Juli 2025 Telah ada ${index + 1}',
-                    'tanggal': '06 Okt 2025, 12:00',
-                  };
+              child: StreamBuilder<List<News>>(
+                stream: _newsController.getPublishedNewsStream(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return const Center(child: Text("Belum ada berita."));
+                  }
 
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 10.0),
-                    child: GestureDetector(
-                      onTap: () => context.go('/pd/berita/detail'),
-                      child: _buildBeritaCard(context, berita),
-                    ),
+                  final beritaList = snapshot.data!;
+                  return ListView.builder(
+                    itemCount: beritaList.length,
+                    itemBuilder: (context, index) {
+                      final berita = beritaList[index];
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 10.0),
+                        child: GestureDetector(
+                          onTap: () => context.go('/pd/berita/detail', extra: berita.id),
+                          child: _buildBeritaCard(context, berita),
+                        ),
+                      );
+                    },
                   );
                 },
               ),
@@ -108,7 +119,7 @@ class DesaBeritaPage extends StatelessWidget {
     );
   }
 
-  Widget _buildBeritaCard(BuildContext context, Map<String, dynamic> berita) {
+Widget _buildBeritaCard(BuildContext context, News berita) {
     return Container(
       height: 100,
       decoration: BoxDecoration(
@@ -130,8 +141,8 @@ class DesaBeritaPage extends StatelessWidget {
               flex: 1,
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(5),
-                child: Image.asset(
-                  berita['image'],
+                child: Image.network(
+                  berita.thumbnail.isNotEmpty ? berita.thumbnail : 'https://via.placeholder.com/150',
                   width: double.infinity,
                   height: double.infinity,
                   fit: BoxFit.cover,
@@ -146,7 +157,7 @@ class DesaBeritaPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    berita['title'],
+                    berita.title,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.poppins(
@@ -157,7 +168,9 @@ class DesaBeritaPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    berita['tanggal'],
+                    berita.publishedAt != null
+                        ? '${berita.publishedAt!.day} ${_monthName(berita.publishedAt!.month)} ${berita.publishedAt!.year}, ${berita.publishedAt!.hour}:${berita.publishedAt!.minute.toString().padLeft(2, '0')}'
+                        : '-',
                     style: GoogleFonts.poppins(
                       fontSize: 10,
                       fontWeight: FontWeight.w400,
@@ -171,5 +184,13 @@ class DesaBeritaPage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _monthName(int month) {
+    const months = [
+      '', 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
+      'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'
+    ];
+    return months[month];
   }
 }

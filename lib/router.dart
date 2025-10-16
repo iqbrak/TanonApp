@@ -37,7 +37,7 @@ final GoRouter appRouter = GoRouter(
       routes: [
         GoRoute(path: '/pd/beranda', builder: (_, __) => const DesaBerandaPage()),
         GoRoute(path: '/pd/data', builder: (_, __) => const DesaDataPage()),
-        GoRoute(path: '/pd/berita', builder: (_, __) => const DesaBeritaPage()),
+        GoRoute(path: '/pd/berita', builder: (_, __) => DesaBeritaPage()),
         GoRoute(path: '/pd/akun', builder: (_, __) => const DesaAkunPage()),
         GoRoute(path: '/pd/data/users', builder: (_, __) => const DesaDataUsersPage()),
         GoRoute(path: '/pd/data/users/add', builder: (_, __) => const DesaDataUsersAddPage()),
@@ -49,7 +49,15 @@ final GoRouter appRouter = GoRouter(
         GoRoute(path: '/pd/data/news/add', builder: (_, __) => const DesaDataNewsFormPage()),
         GoRoute(path: '/pd/data/news/edit', builder: (context, state) => DesaDataNewsFormPage(id: state.uri.queryParameters['id'])),
         GoRoute(path: '/pd/data/requests', builder: (_, __) => const DesaDataRequestsPage()),
-        GoRoute(path: '/pd/berita/detail', builder: (_, __) => const DesaBeritaDetailPage()),
+
+        GoRoute(
+  path: '/pd/berita/detail',
+  builder: (context, state) {
+    final newsId = state.extra as String; // aman, pasti ada
+    return DesaBeritaDetailPage(newsId: newsId);
+  },
+),  
+        
       ],
     ),
 
