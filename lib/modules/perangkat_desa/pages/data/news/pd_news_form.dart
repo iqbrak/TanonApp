@@ -3,10 +3,13 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:file_picker/file_picker.dart';
 import '../../../../../core/controllers/news_controller.dart';
+import '../../../../../core/controllers/auth_controller.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class DesaDataNewsFormPage extends StatefulWidget {
   final String? id;
   const DesaDataNewsFormPage({super.key, this.id});
+  
 
   @override
   State<DesaDataNewsFormPage> createState() => _DesaDataNewsFormPageState();
@@ -16,6 +19,7 @@ class _DesaDataNewsFormPageState extends State<DesaDataNewsFormPage> {
   final _formKey = GlobalKey<FormState>();
   final titleController = TextEditingController();
   final contentController = TextEditingController();
+  final authController = AuthController();
   String status = 'Draft';
 
   PlatformFile? thumbnailFile;
@@ -79,14 +83,26 @@ class _DesaDataNewsFormPageState extends State<DesaDataNewsFormPage> {
     setState(() => isLoading = true);
 
     try {
-      final userId = 'system';
+      final currentUser = authController.currentUser;
+      String username = 'system';
+
+      if (currentUser != null) {
+        final userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(currentUser.uid)
+            .get();
+
+        if (userDoc.exists) {
+          username = userDoc.data()?['username'] ?? 'system';
+        }
+      }
+
       if (isEdit) {
-        // Update news
         await controller.updateNews(
           id: widget.id!,
           title: titleController.text,
           content: contentController.text,
-          userId: userId,
+          userId: username,
           status: status,
           newPlatformThumbnail: thumbnailFile,
           newPlatformFiles:
@@ -99,7 +115,7 @@ class _DesaDataNewsFormPageState extends State<DesaDataNewsFormPage> {
         await controller.addNews(
           title: titleController.text,
           content: contentController.text,
-          userId: userId,
+          userId: username,
           status: status,
           platformThumbnail: thumbnailFile,
           platformFiles: supportingFiles.isEmpty ? null : supportingFiles,
@@ -197,24 +213,40 @@ class _DesaDataNewsFormPageState extends State<DesaDataNewsFormPage> {
                   ElevatedButton(
                     onPressed: _pickThumbnail,
                     style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF245BCA)),
-                    child: Text('Pilih Thumbnail',
-                        style: GoogleFonts.poppins(color: Colors.white)),
-                  ),
-                  const SizedBox(width: 12),
-                  if (thumbnailFile != null)
-                    Flexible(
-                      child: Text(
-                        thumbnailFile!.name,
-                        overflow: TextOverflow.ellipsis,
+                      backgroundColor: Colors.white,
+                      foregroundColor: const Color(0xFF245BCA),
+                      side: const BorderSide(color: Color(0xFF245BCA), width: 1.5),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
                       ),
                     ),
+                    child: Text(
+                      'Pilih',
+                      style: GoogleFonts.poppins(
+                        color: const Color(0xFF245BCA),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  
+                  Expanded(
+                    child: TextFormField(
+                      enabled: false, 
+                      decoration: InputDecoration(
+                        hintText: thumbnailFile?.name ?? 'Belum pilih thumbnail',
+                        border: const OutlineInputBorder(),
+                        isDense: true,
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                      ),
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 16),
 
-              Text('File Pendukung',
-                  style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+              Text('File Pendukung', style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
               const SizedBox(height: 8),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -224,9 +256,21 @@ class _DesaDataNewsFormPageState extends State<DesaDataNewsFormPage> {
                       ElevatedButton(
                         onPressed: _pickSupportingFiles,
                         style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF245BCA)),
-                        child: Text('Pilih Files',
-                            style: GoogleFonts.poppins(color: Colors.white)),
+                          backgroundColor: Colors.white,
+                          foregroundColor: const Color(0xFF245BCA),
+                          side: const BorderSide(color: Color(0xFF245BCA), width: 1.5),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: Text(
+                          'Pilih',
+                          style: GoogleFonts.poppins(
+                            color: const Color(0xFF245BCA),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ),
                       const SizedBox(width: 12),
                       Text("${supportingFiles.length} file dipilih"),

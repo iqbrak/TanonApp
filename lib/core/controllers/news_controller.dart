@@ -151,7 +151,7 @@ class NewsController {
     }
 
     DateTime? publishedAt;
-    if (status == 'publish') publishedAt = DateTime.now();
+    if (status == 'Publish') publishedAt = DateTime.now();
 
     final news = News(
       id: id,
@@ -202,8 +202,8 @@ class NewsController {
     }
 
     DateTime? publishedAt = current.publishedAt;
-    if (status == 'publish' && publishedAt == null) publishedAt = DateTime.now();
-    if (status != 'publish') publishedAt = null;
+    if (status == 'Publish' && publishedAt == null) publishedAt = DateTime.now();
+    if (status != 'Publish') publishedAt = null;
 
     final updated = News(
       id: id,
@@ -253,34 +253,6 @@ class NewsController {
       await supabase.storage.from('TanonApp Storage').remove([path]);
     } catch (e) {
       throw Exception('Gagal hapus file: $e');
-    }
-  }
-
-  Future<void> deleteNewsWithConfirmation(BuildContext context, String id) async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Konfirmasi Hapus'),
-        content: const Text('Yakin ingin menghapus data?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Batal'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFCA2424)),
-            child: const Text('Hapus', style: TextStyle(color: Colors.white)),
-          ),
-        ],
-      ),
-    );
-
-    if (confirm == true) {
-      await deleteNews(id);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Berita berhasil dihapus')),
-      );
     }
   }
 }
