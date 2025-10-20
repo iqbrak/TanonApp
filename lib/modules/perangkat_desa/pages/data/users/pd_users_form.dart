@@ -113,7 +113,6 @@ class _DesaDataUsersFormPageState extends State<DesaDataUsersFormPage> {
     if (!_formKey.currentState!.validate()) return;
 
     try {
-      String birthPlaceDate = "${birthPlaceController.text.trim()}, ${birthDateController.text.trim()}";
       String address = "${rtController.text.trim()}, ${rwController.text.trim()}, ${dusunController.text.trim()}";
       String rt = rtController.text.trim();
 
