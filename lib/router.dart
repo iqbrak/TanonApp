@@ -8,6 +8,8 @@ import 'modules/perangkat_desa/pages/pd_beranda.dart';
 import 'modules/perangkat_desa/pages/pd_data.dart';
 import 'modules/perangkat_desa/pages/pd_berita.dart';
 import 'modules/perangkat_desa/pages/pd_akun.dart';
+import 'modules/perangkat_desa/pages/pd_akun_profil.dart';
+import 'modules/perangkat_desa/pages/pd_akun_profil_form.dart';
 import 'modules/perangkat_desa/pages/data/users/pd_users.dart';
 import 'modules/perangkat_desa/pages/data/users/pd_users_form.dart';
 import 'modules/perangkat_desa/pages/data/services/pd_services.dart';
@@ -38,6 +40,8 @@ final GoRouter appRouter = GoRouter(
         GoRoute(path: '/pd/data', builder: (_, __) => const DesaDataPage()),
         GoRoute(path: '/pd/berita', builder: (_, __) => DesaBeritaPage()),
         GoRoute(path: '/pd/akun', builder: (_, __) => const DesaAkunPage()),
+        GoRoute(path: '/pd/akun/profil', builder: (_, __) => const DesaAkunProfilPage()),
+        GoRoute(path: '/pd/akun/profil/form', builder: (_, __) => const DesaAkunProfilFormPage()),
         GoRoute(path: '/pd/data/users', builder: (_, __) => const DesaDataUsersPage()),
         GoRoute(path: '/pd/data/users/add', builder: (_, __) => const DesaDataUsersFormPage()),
         GoRoute(path: '/pd/data/users/edit', builder: (context, state) => DesaDataUsersFormPage(id: state.uri.queryParameters['id'])),
