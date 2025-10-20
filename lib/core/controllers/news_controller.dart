@@ -27,6 +27,10 @@ class NewsController {
     });
   }
 
+  Stream<int> getTotalNews() {
+    return getNewsStream().map((list) => list.length);
+  }
+
   Stream<List<News>> getPublishedNewsStream() {
     return getNewsStream().map(
       (list) => list.where((news) => news.publishedAt != null).toList(),

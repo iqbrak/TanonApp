@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../../core/controllers/service_controller.dart';
+import '../../../../../core/controllers/news_controller.dart';
+import '../../../../../core/models/news.dart';
 
 class DesaBerandaPage extends StatelessWidget {
-  const DesaBerandaPage({super.key});
+  final newsController = NewsController();
+  final serviceController = ServiceController();
+  DesaBerandaPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -113,14 +118,20 @@ class DesaBerandaPage extends StatelessWidget {
               ),
               const SizedBox(width: 10),
               Expanded(
-                child: _buildSmallCard(
-                  context: context,
-                  iconPath: 'assets/images/ic_services.png',
-                  title: 'Keperluan',
-                  total: 80,
-                  color: const Color(0xFFCEDDFF),
-                  route: '/data/services',
-                ),
+                child: StreamBuilder<int>(
+    stream: serviceController.getTotalServices(),
+    builder: (context, snapshot) {
+      final total = snapshot.data ?? 0;
+      return _buildSmallCard(
+        context: context,
+        iconPath: 'assets/images/ic_services.png',
+        title: 'Keperluan',
+        total: total,
+        color: const Color(0xFFCEDDFF),
+        route: '/pd/data/services',
+      );
+    },
+  ),
               ),
             ],
           ),
@@ -139,13 +150,19 @@ class DesaBerandaPage extends StatelessWidget {
               ),
               const SizedBox(width: 10),
               Expanded(
-                child: _buildSmallCard(
-                  context: context,
-                  iconPath: 'assets/images/ic_news.png',
-                  title: 'Berita',
-                  total: 25,
-                  color: const Color(0xFFCEDDFF),
-                  route: '/berita',
+                child: StreamBuilder<int>(
+                  stream: newsController.getTotalNews(),
+                  builder: (context, snapshot) {
+                    final total = snapshot.data ?? 0;
+                    return _buildSmallCard(
+                      context: context,
+                      iconPath: 'assets/images/ic_news.png',
+                      title: 'Berita',
+                      total: total,
+                      color: const Color(0xFFCEDDFF),
+                      route: '/pd/data/news',
+                    );
+                  },
                 ),
               ),
             ],
@@ -207,128 +224,141 @@ class DesaBerandaPage extends StatelessWidget {
   }
 
   Widget _buildBeritaSection(BuildContext context) {
-    final List<Map<String, String>> berita = List.generate(
-      3,
-      (index) => {
-        'image': 'https://images.unsplash.com/photo-1604014237747-2d1a3a9a2d1e',
-        'title':
-            'Judul Berita Pengumuman Dana Bansos Periode Juli 2025 ke-${index + 1}',
-        'tanggal': '06 Okt 2025, 12:00',
-      },
-    );
+    return StreamBuilder<List<News>>(
+      stream: newsController.getPublishedNewsStream(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        final berita = snapshot.data!.take(5).toList();
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Berita Terbaru',
-              style: GoogleFonts.poppins(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: const Color(0xFF01002E),
-              ),
-            ),
-            GestureDetector(
-              onTap: () => context.go('/berita'),
-              child: Text(
-                'Lihat Semua',
-                style: GoogleFonts.poppins(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: const Color(0xFF245BCA),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Berita Terbaru',
+                  style: GoogleFonts.poppins(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF01002E),
+                  ),
                 ),
+                GestureDetector(
+                  onTap: () => context.go('/pd/berita'),
+                  child: Text(
+                    'Lihat Semua',
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: const Color(0xFF245BCA),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            SizedBox(
+              height: 150,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: berita.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 10),
+                itemBuilder: (context, index) {
+                  final item = berita[index];
+                  return GestureDetector(
+                    onTap: () => context.go(
+                      '/pd/berita/detail',
+                      extra: item.id,
+                    ),
+                    child: Container(
+                      width: 140,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 5,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ClipRRect(
+                            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                            child: Image.network(
+                              item.thumbnail,
+                              width: 140,
+                              height: 80,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Container(
+                                  width: 140,
+                                  height: 80,
+                                  color: Colors.grey[300],
+                                  child: const Icon(
+                                    Icons.broken_image,
+                                    size: 40,
+                                    color: Colors.white,
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  item.title,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: const Color(0xFF01002E),
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  item.publishedAt != null
+                                      ? "${item.publishedAt!.day.toString().padLeft(2,'0')} ${_monthName(item.publishedAt!.month)} ${item.publishedAt!.year}, ${item.publishedAt!.hour.toString().padLeft(2,'0')}:${item.publishedAt!.minute.toString().padLeft(2,'0')}"
+                                      : '',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w400,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
           ],
-        ),
-        const SizedBox(height: 10),
-        SizedBox(
-          height: 150,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemCount: berita.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 10),
-            itemBuilder: (context, index) {
-              final item = berita[index];
-              return GestureDetector(
-                onTap: () => context.go('/berita/detail'),
-                child: Container(
-                  width: 140,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 5,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ClipRRect(
-                        borderRadius:
-                            const BorderRadius.vertical(top: Radius.circular(20)),
-                        child: Image.network(
-                          item['image']!,
-                          width: 140,
-                          height: 80,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Container(
-                              width: 140,
-                              height: 80,
-                              color: Colors.grey[300],
-                              child: const Icon(
-                                Icons.broken_image,
-                                size: 40,
-                                color: Colors.white,
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              item['title']!,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: GoogleFonts.poppins(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: const Color(0xFF01002E),
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              item['tanggal']!,
-                              style: GoogleFonts.poppins(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w400,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-      ],
+        );
+      },
     );
+  }
+
+  String _monthName(int month) {
+    const names = [
+      '', 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
+      'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'
+    ];
+    return names[month];
   }
 }

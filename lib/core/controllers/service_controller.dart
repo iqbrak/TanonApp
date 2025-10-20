@@ -16,6 +16,10 @@ class ServiceController {
     });
   }
 
+  Stream<int> getTotalServices() {
+    return getServicesStream().map((list) => list.length);
+  }
+
   Future<Service?> getServiceById(String id) async {
     final doc = await _firestore.collection(collectionName).doc(id).get();
     if (doc.exists) {

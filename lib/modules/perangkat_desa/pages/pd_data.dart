@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../../core/controllers/service_controller.dart';
-import '../../../../../core/models/service.dart';
+import '../../../../../core/controllers/news_controller.dart';
 
 class DesaDataPage extends StatefulWidget {
   const DesaDataPage({super.key});
@@ -12,7 +12,8 @@ class DesaDataPage extends StatefulWidget {
 }
 
 class _DesaDataPageState extends State<DesaDataPage> {
-  final controller = ServiceController();
+  final serviceController = ServiceController();
+  final newsController = NewsController();
 
   @override
   Widget build(BuildContext context) {
@@ -65,10 +66,10 @@ class _DesaDataPageState extends State<DesaDataPage> {
                 
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                  child: StreamBuilder<List<Service>>(
-                    stream: controller.getServicesStream(),
+                  child: StreamBuilder<int>(
+                    stream: serviceController.getTotalServices(),
                     builder: (context, snapshot) {
-                      final total = snapshot.data?.length ?? 0;
+                      final total = snapshot.data ?? 0;
                       return _buildDataCard(
                         title: 'Data Keperluan',
                         iconPath: 'assets/images/ic_services.png',
@@ -81,6 +82,7 @@ class _DesaDataPageState extends State<DesaDataPage> {
                     },
                   ),
                 ),
+
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                   child: _buildDataCard(
@@ -93,16 +95,23 @@ class _DesaDataPageState extends State<DesaDataPage> {
                     onPressed: () => context.go('/pd/data/requests'),
                   ),
                 ),
+                
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                  child: _buildDataCard(
-                    title: 'Data Berita',
-                    iconPath: 'assets/images/ic_news.png',
-                    total: 25,
-                    color: const Color(0xFF4E82EA),
-                    buttonColor: const Color(0xFFCEDDFF),
-                    buttonTextColor: const Color(0xFF01002E),
-                    onPressed: () => context.go('/pd/data/news'),
+                  child: StreamBuilder<int>(
+                    stream: newsController.getTotalNews(),
+                    builder: (context, snapshot) {
+                      final total = snapshot.data ?? 0;
+                      return _buildDataCard(
+                        title: 'Data Beritta',
+                        iconPath: 'assets/images/ic_news.png',
+                        total: total,
+                        color: const Color(0xFF4E82EA),
+                        buttonColor: const Color(0xFFCEDDFF),
+                        buttonTextColor: const Color(0xFF01002E),
+                        onPressed: () => context.go('/pd/data/news'),
+                      );
+                    },
                   ),
                 ),
                 const SizedBox(height: 20),

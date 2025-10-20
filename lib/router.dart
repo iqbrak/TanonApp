@@ -35,7 +35,7 @@ final GoRouter appRouter = GoRouter(
     ShellRoute(
       builder: (context, state, child) => PerangkatDesaMain(child: child),
       routes: [
-        GoRoute(path: '/pd/beranda', builder: (_, __) => const DesaBerandaPage()),
+        GoRoute(path: '/pd/beranda', builder: (_, __) => DesaBerandaPage()),
         GoRoute(path: '/pd/data', builder: (_, __) => const DesaDataPage()),
         GoRoute(path: '/pd/berita', builder: (_, __) => DesaBeritaPage()),
         GoRoute(path: '/pd/akun', builder: (_, __) => const DesaAkunPage()),
@@ -51,13 +51,12 @@ final GoRouter appRouter = GoRouter(
         GoRoute(path: '/pd/data/requests', builder: (_, __) => const DesaDataRequestsPage()),
 
         GoRoute(
-  path: '/pd/berita/detail',
-  builder: (context, state) {
-    final newsId = state.extra as String; // aman, pasti ada
-    return DesaBeritaDetailPage(newsId: newsId);
-  },
-),  
-        
+          path: '/pd/berita/detail',
+          builder: (context, state) {
+            final newsId = state.extra as String; 
+            return DesaBeritaDetailPage(newsId: newsId);
+          },
+        ),  
       ],
     ),
 
