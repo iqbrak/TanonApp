@@ -1,60 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../../core/controllers/user_controller.dart';
+import '../../../../../core/models/user.dart';
 
-class DesaDataUsersPage extends StatelessWidget {
+class DesaDataUsersPage extends StatefulWidget {
   const DesaDataUsersPage({super.key});
 
-  static const List<Map<String, dynamic>> dummyData = [
-    {
-      "id": "1",
-      "name": "Iqbra Kurniawan",
-      "email": "iqbra@mail.com",
-      "role": "Warga"
-    },
-    {
-      "id": "2",
-      "name": "Wahyu Nugroho",
-      "email": "wahyu@mail.com",
-      "role": "Perangkat Desa"
-    },
-    {
-      "id": "3",
-      "name": "Chalimatus Sa'diyah",
-      "email": "halima@mail.com",
-      "role": "Warga"
-    },
-    {
-      "id": "4",
-      "name": "Safira Nabila Bilqis",
-      "email": "nabila@mail.com",
-      "role": "RT"
-    },
-    {
-      "id": "5",
-      "name": "Iqbra Kurniawan",
-      "email": "iqbra@mail.com",
-      "role": "Warga"
-    },
-    {
-      "id": "6",
-      "name": "Wahyu Nugroho",
-      "email": "wahyu@mail.com",
-      "role": "Perangkat Desa"
-    },
-    {
-      "id": "7",
-      "name": "Chalimatus Sa'diyah",
-      "email": "halima@mail.com",
-      "role": "Warga"
-    },
-    {
-      "id": "8",
-      "name": "Safira Nabila Bilqis",
-      "email": "nabila@mail.com",
-      "role": "RT"
-    },
-  ];
+  @override
+  State<DesaDataUsersPage> createState() => _DesaDataUsersPageState();
+}
+
+class _DesaDataUsersPageState extends State<DesaDataUsersPage> {
+  final controller = UserController();
+  String searchKeyword = '';
 
   @override
   Widget build(BuildContext context) {
@@ -71,14 +30,13 @@ class DesaDataUsersPage extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back,
-                          color: Color(0xFF00194A)),
-                      onPressed: () => context.go('/pd/data'),
-                    ),
+                      IconButton(
+                        icon: const Icon(Icons.arrow_back, color: Color(0xFF00194A)),
+                        onPressed: () => context.go('/pd/data'),
+                      ),
                       const SizedBox(width: 8),
                       Text(
-                        'Data Pengguna',
+                        'Data User',
                         style: GoogleFonts.poppins(
                           fontSize: 20,
                           fontWeight: FontWeight.w600,
@@ -89,23 +47,24 @@ class DesaDataUsersPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   TextField(
+                    onChanged: (value) {
+                      setState(() {
+                        searchKeyword = value;
+                      });
+                    },
                     decoration: InputDecoration(
-                      hintText: 'Cari pengguna...',
-                      prefixIcon:
-                          const Icon(Icons.search, color: Color(0xFF00194A)),
+                      hintText: 'Cari berdasar username...',
+                      prefixIcon: const Icon(Icons.search, color: Color(0xFF00194A)),
                       filled: true,
                       fillColor: Colors.white,
-                      contentPadding:
-                          const EdgeInsets.symmetric(vertical: 10),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 10),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(15),
-                        borderSide: const BorderSide(
-                            color: Color(0xFF00194A), width: 1.5),
+                        borderSide: const BorderSide(color: Color(0xFF00194A), width: 1.5),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(15),
-                        borderSide: const BorderSide(
-                            color: Color(0xFF00194A), width: 1.5),
+                        borderSide: const BorderSide(color: Color(0xFF00194A), width: 1.5),
                       ),
                     ),
                   ),
@@ -115,21 +74,33 @@ class DesaDataUsersPage extends StatelessWidget {
             ),
 
             Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.only(bottom: 80),
-                itemCount: dummyData.length,
-                itemBuilder: (context, index) {
-                  final item = dummyData[index];
-                  return Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    child: _buildExpandableCard(
-                      context,
-                      id: item["id"],
-                      name: item["name"],
-                      email: item["email"],
-                      role: item["role"],
-                    ),
+              child: StreamBuilder<List<User>>(
+                stream: searchKeyword.isEmpty
+                    ? controller.getUsersStream()
+                    : controller.getFilteredUsersStream(searchKeyword),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (snapshot.hasError) {
+                    return Center(child: Text('Terjadi kesalahan: ${snapshot.error}'));
+                  }
+                  final users = snapshot.data ?? [];
+
+                  if (users.isEmpty) {
+                    return const Center(child: Text('Data user belum tersedia'));
+                  }
+
+                  return ListView.builder(
+                    padding: const EdgeInsets.only(bottom: 80),
+                    itemCount: users.length,
+                    itemBuilder: (context, index) {
+                      final item = users[index];
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        child: _buildExpandableCard(context, user: item),
+                      );
+                    },
                   );
                 },
               ),
@@ -146,11 +117,7 @@ class DesaDataUsersPage extends StatelessWidget {
     );
   }
 
-  Widget _buildExpandableCard(BuildContext context,
-      {required String id,
-      required String name,
-      required String email,
-      required String role}) {
+  Widget _buildExpandableCard(BuildContext context, {required User user}) {
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFFCEDDFF),
@@ -158,9 +125,8 @@ class DesaDataUsersPage extends StatelessWidget {
         border: Border.all(color: const Color(0xFF00194A), width: 1.5),
       ),
       child: ExpansionTile(
-        key: PageStorageKey<String>(id),
-        tilePadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        key: PageStorageKey<String>(user.id),
+        tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         expandedAlignment: Alignment.centerLeft,
         expandedCrossAxisAlignment: CrossAxisAlignment.start,
         leading: Container(
@@ -174,34 +140,85 @@ class DesaDataUsersPage extends StatelessWidget {
             ),
           ),
         ),
-        title: Text(name,
-            style: GoogleFonts.poppins(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: const Color(0xFF00194A))),
+        title: Text(
+          user.username,
+          style: GoogleFonts.poppins(
+              fontSize: 14, fontWeight: FontWeight.w600, color: const Color(0xFF00194A)),
+        ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             IconButton(
               icon: const Icon(Icons.edit, color: Color(0xFF245BCA)),
-              onPressed: () => context.go('/pd/data/users/edit?id=$id'),
+              onPressed: () => context.go('/pd/data/users/edit?id=${user.id}'),
             ),
             IconButton(
               icon: const Icon(Icons.delete, color: Color(0xFFCA2424)),
-              onPressed: () {},
+              onPressed: () =>
+                  UserController().deleteUserWithConfirmation(context, user.id),
             ),
           ],
         ),
-        childrenPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        childrenPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         children: [
-          Text("Email: $email",
+          Text("Email:",
               style: GoogleFonts.poppins(
-                  fontSize: 12, color: Colors.grey[700])),
+                  fontSize: 12, fontWeight: FontWeight.w600, color: const Color(0xFF00194A))),
+          Text(user.email, style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[700])),
           const SizedBox(height: 4),
-          Text("Role: $role",
+
+          Text("Tempat, Tanggal Lahir:",
               style: GoogleFonts.poppins(
-                  fontSize: 12, color: Colors.grey[800])),
+                  fontSize: 12, fontWeight: FontWeight.w600, color: const Color(0xFF00194A))),
+          Text(user.birthPlaceDate, style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[700])),
+          const SizedBox(height: 4),
+
+          Text("Agama:",
+              style: GoogleFonts.poppins(
+                  fontSize: 12, fontWeight: FontWeight.w600, color: const Color(0xFF00194A))),
+          Text(user.religion, style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[700])),
+          const SizedBox(height: 4),
+
+          Text("Kewarganegaraan:",
+              style: GoogleFonts.poppins(
+                  fontSize: 12, fontWeight: FontWeight.w600, color: const Color(0xFF00194A))),
+          Text(user.nationality, style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[700])),
+          const SizedBox(height: 4),
+
+          Text("Pekerjaan:",
+              style: GoogleFonts.poppins(
+                  fontSize: 12, fontWeight: FontWeight.w600, color: const Color(0xFF00194A))),
+          Text(user.occupation, style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[700])),
+          const SizedBox(height: 4),
+
+          Text("Status Pernikahan:",
+              style: GoogleFonts.poppins(
+                  fontSize: 12, fontWeight: FontWeight.w600, color: const Color(0xFF00194A))),
+          Text(user.maritalStatus, style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[700])),
+          const SizedBox(height: 4),
+
+          Text("Alamat (RT, RW, Dusun):",
+              style: GoogleFonts.poppins(
+                  fontSize: 12, fontWeight: FontWeight.w600, color: const Color(0xFF00194A))),
+          Text(user.address, style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[700])),
+          const SizedBox(height: 4),
+
+          Text("RT:",
+              style: GoogleFonts.poppins(
+                  fontSize: 12, fontWeight: FontWeight.w600, color: const Color(0xFF00194A))),
+          Text(user.rt, style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[700])),
+          const SizedBox(height: 4),
+
+          Text("No. Telepon:",
+              style: GoogleFonts.poppins(
+                  fontSize: 12, fontWeight: FontWeight.w600, color: const Color(0xFF00194A))),
+          Text(user.phone, style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[700])),
+          const SizedBox(height: 4),
+
+          Text("Role:",
+              style: GoogleFonts.poppins(
+                  fontSize: 12, fontWeight: FontWeight.w600, color: const Color(0xFF00194A))),
+          Text(user.role, style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[700])),
         ],
       ),
     );

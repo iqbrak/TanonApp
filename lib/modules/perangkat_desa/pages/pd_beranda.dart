@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../../core/controllers/user_controller.dart';
 import '../../../../../core/controllers/service_controller.dart';
 import '../../../../../core/controllers/news_controller.dart';
 import '../../../../../core/models/news.dart';
 
 class DesaBerandaPage extends StatelessWidget {
+  final userController = UserController();
   final newsController = NewsController();
   final serviceController = ServiceController();
   DesaBerandaPage({super.key});
@@ -107,31 +109,37 @@ class DesaBerandaPage extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: _buildSmallCard(
-                  context: context,
-                  iconPath: 'assets/images/ic_users.png',
-                  title: 'Pengguna',
-                  total: 240,
-                  color: const Color(0xFFCEDDFF),
-                  route: '/data/users',
+                child: StreamBuilder<int>(
+                  stream: userController.getTotalUsers(),
+                  builder: (context, snapshot) {
+                    final total = snapshot.data ?? 0;
+                    return _buildSmallCard(
+                      context: context,
+                      iconPath: 'assets/images/ic_users.png',
+                      title: 'Pengguna',
+                      total: total,
+                      color: const Color(0xFFCEDDFF),
+                      route: '/pd/data/users',
+                    );
+                  },
                 ),
               ),
               const SizedBox(width: 10),
               Expanded(
                 child: StreamBuilder<int>(
-    stream: serviceController.getTotalServices(),
-    builder: (context, snapshot) {
-      final total = snapshot.data ?? 0;
-      return _buildSmallCard(
-        context: context,
-        iconPath: 'assets/images/ic_services.png',
-        title: 'Keperluan',
-        total: total,
-        color: const Color(0xFFCEDDFF),
-        route: '/pd/data/services',
-      );
-    },
-  ),
+                  stream: serviceController.getTotalServices(),
+                  builder: (context, snapshot) {
+                    final total = snapshot.data ?? 0;
+                    return _buildSmallCard(
+                      context: context,
+                      iconPath: 'assets/images/ic_services.png',
+                      title: 'Keperluan',
+                      total: total,
+                      color: const Color(0xFFCEDDFF),
+                      route: '/pd/data/services',
+                    );
+                  },
+                ),
               ),
             ],
           ),

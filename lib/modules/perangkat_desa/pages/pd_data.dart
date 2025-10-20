@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../../core/controllers/user_controller.dart';
 import '../../../../../core/controllers/service_controller.dart';
 import '../../../../../core/controllers/news_controller.dart';
 
@@ -12,6 +13,7 @@ class DesaDataPage extends StatefulWidget {
 }
 
 class _DesaDataPageState extends State<DesaDataPage> {
+  final userController = UserController();
   final serviceController = ServiceController();
   final newsController = NewsController();
 
@@ -53,14 +55,20 @@ class _DesaDataPageState extends State<DesaDataPage> {
               children: [
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                  child: _buildDataCard(
-                    title: 'Data Pengguna',
-                    iconPath: 'assets/images/ic_users.png',
-                    total: 80,
-                    color: const Color(0xFFCEDDFF),
-                    buttonColor: const Color(0xFF00194A),
-                    buttonTextColor: Colors.white,
-                    onPressed: () => context.go('/pd/data/users'),
+                  child: StreamBuilder<int>(
+                    stream: userController.getTotalUsers(),
+                    builder: (context, snapshot) {
+                      final total = snapshot.data ?? 0;
+                      return _buildDataCard(
+                        title: 'Data Pengguna',
+                        iconPath: 'assets/images/ic_users.png',
+                        total: total,
+                        color: const Color(0xFFCEDDFF),
+                        buttonColor: const Color(0xFF00194A),
+                        buttonTextColor: Colors.white,
+                        onPressed: () => context.go('/pd/data/users'),
+                      );
+                    },
                   ),
                 ),
                 
@@ -95,7 +103,7 @@ class _DesaDataPageState extends State<DesaDataPage> {
                     onPressed: () => context.go('/pd/data/requests'),
                   ),
                 ),
-                
+
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                   child: StreamBuilder<int>(
