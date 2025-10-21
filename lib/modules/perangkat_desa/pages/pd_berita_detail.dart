@@ -135,32 +135,49 @@ class _DesaBeritaDetailPageState extends State<DesaBeritaDetailPage> {
                       const SizedBox(height: 24),
                       SizedBox(
                         width: double.infinity,
-                        child: ElevatedButton.icon(
-                          onPressed: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Mengunduh file media...'),
+                        child: 
+                          ElevatedButton.icon(
+                            onPressed: () async {
+                              if (news!.files.isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Tidak ada file untuk diunduh')),
+                                );
+                                return;
+                              }
+
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Mengunduh file media...')),
+                              );
+
+                              try {
+                                await _newsController.downloadNewsFiles(news!.files);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Download selesai!')),
+                                );
+                              } catch (e) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('Gagal download: $e')),
+                                );
+                              }
+                            },
+                            icon: const Icon(Icons.download, color: Colors.white),
+                            label: Text(
+                              'Unduh File Media',
+                              style: GoogleFonts.poppins(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
                               ),
-                            );
-                          },
-                          icon: const Icon(Icons.download, color: Colors.white),
-                          label: Text(
-                            'Unduh File Media',
-                            style: GoogleFonts.poppins(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white,
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF245BCA),
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              elevation: 5,
                             ),
                           ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF245BCA),
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            elevation: 5,
-                          ),
-                        ),
                       ),
                       const SizedBox(height: 16),
                     ],

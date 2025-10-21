@@ -4,6 +4,12 @@ import '../models/news.dart';
 import 'package:uuid/uuid.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:path_provider/path_provider.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:open_file/open_file.dart';
 
 class NewsController {
   final DatabaseReference _dbRef =
@@ -262,6 +268,51 @@ class NewsController {
       await supabase.storage.from('TanonApp Storage').remove([path]);
     } catch (e) {
       throw Exception('Gagal hapus file: $e');
+    }
+  }
+
+  Future<void> downloadNewsFiles(List<Map<String, dynamic>> files) async {
+    if (files.isEmpty) return;
+
+    if (kIsWeb) {
+      for (final f in files) {
+        final url = f['url'] as String;
+        if (url.isNotEmpty) {
+          if (!await launchUrl(Uri.parse(url))) {
+            throw Exception('Tidak bisa membuka $url');
+          }
+        }
+      }
+    } else {
+      final status = await Permission.storage.request();
+      if (!status.isGranted) {
+        throw Exception('Storage permission tidak diberikan');
+      }
+
+      final dio = Dio();
+      Directory? downloadDir;
+
+      if (Platform.isAndroid) {
+        downloadDir = await getExternalStorageDirectory();
+        final path = "/storage/emulated/0/Download";
+        downloadDir = Directory(path);
+      } else if (Platform.isIOS) {
+        downloadDir = await getApplicationDocumentsDirectory();
+      }
+
+      if (downloadDir == null) throw Exception('Tidak bisa akses folder download');
+
+      for (final f in files) {
+        final url = f['url'] as String;
+        final name = f['name'] as String;
+        final savePath = '${downloadDir.path}/$name';
+
+        try {
+          await dio.download(url, savePath);
+        } catch (e) {
+          print('Download $name gagal: $e');
+        }
+      }
     }
   }
 }

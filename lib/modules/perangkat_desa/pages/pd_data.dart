@@ -111,7 +111,7 @@ class _DesaDataPageState extends State<DesaDataPage> {
                     builder: (context, snapshot) {
                       final total = snapshot.data ?? 0;
                       return _buildDataCard(
-                        title: 'Data Beritta',
+                        title: 'Data Berita',
                         iconPath: 'assets/images/ic_news.png',
                         total: total,
                         color: const Color(0xFF4E82EA),
