@@ -197,16 +197,10 @@ class _DesaDataUsersPageState extends State<DesaDataUsersPage> {
           Text(user.maritalStatus, style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[700])),
           const SizedBox(height: 4),
 
-          Text("Alamat (RT, RW, Dusun):",
+          Text("Alamat:",
               style: GoogleFonts.poppins(
                   fontSize: 12, fontWeight: FontWeight.w600, color: const Color(0xFF00194A))),
-          Text(user.address, style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[700])),
-          const SizedBox(height: 4),
-
-          Text("RT:",
-              style: GoogleFonts.poppins(
-                  fontSize: 12, fontWeight: FontWeight.w600, color: const Color(0xFF00194A))),
-          Text(user.rt, style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[700])),
+          Text(formatAddress(user.address), style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[700])),
           const SizedBox(height: 4),
 
           Text("No. Telepon:",
@@ -222,5 +216,15 @@ class _DesaDataUsersPageState extends State<DesaDataUsersPage> {
         ],
       ),
     );
+  }
+
+  String formatAddress(String rawAddress) {
+    final parts = rawAddress.split(',').map((e) => e.trim()).toList();
+
+    final rt = parts.isNotEmpty ? parts[0] : '-';
+    final rw = parts.length > 1 ? parts[1] : '-';
+    final dusun = parts.length > 2 ? parts[2] : '-';
+
+    return 'RT $rt/RW $rw, Dsn. $dusun';
   }
 }

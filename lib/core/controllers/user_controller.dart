@@ -34,15 +34,6 @@ class UserController {
     required String username,
     required String email,
     required String password,
-    required String birthPlace,
-    required String birthDate,
-    required String religion,
-    required String nationality,
-    required String occupation,
-    required String maritalStatus,
-    required String rt,
-    required String address,
-    required String phone,
     required String role,
   }) async {
     String id = _firestore.collection(collectionName).doc().id;
@@ -52,15 +43,16 @@ class UserController {
       username: username.trim(),
       email: email.trim(),
       password: password.trim(),
-      birthPlaceDate: '$birthPlace, $birthDate',
-      religion: religion.trim(),
-      nationality: nationality.trim(),
-      occupation: occupation.trim(),
-      maritalStatus: maritalStatus.trim(),
-      rt: rt.trim(),
-      address: address.trim(),
-      phone: phone.trim(),
       role: role.trim(),
+      // field lain dianggap null/empty
+      birthPlaceDate: '',
+      religion: '',
+      nationality: '',
+      occupation: '',
+      maritalStatus: '',
+      rt: '',
+      address: '',
+      phone: '',
     );
 
     await _firestore.collection(collectionName).doc(id).set(user.toMap());
@@ -96,6 +88,32 @@ class UserController {
       address: address.trim(),
       phone: phone.trim(),
       role: role.trim(),
+    );
+
+    await _firestore.collection(collectionName).doc(id).update(user.toMap());
+  }
+
+  Future<void> updateUserPartial({
+    required String id,
+    required String username,
+    required String email,
+    required String password,
+    required String role,
+  }) async {
+    final user = User(
+      id: id,
+      username: username.trim(),
+      email: email.trim(),
+      password: password.trim(),
+      role: role.trim(),
+      birthPlaceDate: '',
+      religion: '',
+      nationality: '',
+      occupation: '',
+      maritalStatus: '',
+      rt: '',
+      address: '',
+      phone: '',
     );
 
     await _firestore.collection(collectionName).doc(id).update(user.toMap());
