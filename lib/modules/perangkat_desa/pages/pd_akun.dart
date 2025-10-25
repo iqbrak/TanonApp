@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../../../core/controllers/auth_controller.dart';
 
 class DesaAkunPage extends StatelessWidget {
-  const DesaAkunPage({super.key});
+  final authController = AuthController();
+  DesaAkunPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -100,11 +102,13 @@ class DesaAkunPage extends StatelessWidget {
               height: 50,
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: () {
-                  context.go('/auth/login');
+                onPressed: () async {
+                  await authController.logout();
+                  
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Berhasil logout')),
                   );
+                  context.go('/auth/login');
                 },
                 icon: const Icon(Icons.logout, color: Colors.white),
                 label: Text(
