@@ -27,6 +27,9 @@ import 'modules/warga/pages/wg_beranda.dart';
 import 'modules/warga/pages/wg_pengajuan.dart';
 import 'modules/warga/pages/wg_berita.dart';
 import 'modules/warga/pages/wg_akun.dart';
+import 'modules/warga/pages/wg_pengajuan_form.dart';
+import 'modules/warga/pages/wg_pengajuan_success.dart';
+import 'modules/warga/pages/wg_pengajuan_detail.dart';
 
 import 'modules/rt/rt_main.dart';
 
@@ -84,9 +87,19 @@ final GoRouter appRouter = GoRouter(
         GoRoute(path: '/wg/pengajuan', builder: (_, __) => WargaPengajuanPage()),
         GoRoute(path: '/wg/berita', builder: (_, __) => WargaBeritaPage()),
         GoRoute(path: '/wg/akun', builder: (_, __) => WargaAkunPage()),
+        GoRoute(path: '/wg/pengajuan/add', builder: (_, __) => const WargaPengajuanFormPage()),
+        GoRoute(path: '/wg/pengajuan/success', builder: (_, __) => const WargaPengajuanSuccessPage()),
+        GoRoute(
+          path: '/wg/pengajuan/detail',
+          builder: (context, state) {
+            final data = state.extra as Map<String, dynamic>;
+            return WargaPengajuanDetailPage(data: data);
+          },
+        ),
       ],
     ),
 
+    // RT
     GoRoute(path: '/rt/main', builder: (_, __) => const RTMain()),
   ],
 );
