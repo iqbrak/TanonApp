@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../../core/controllers/user_controller.dart';
 import '../../../../../core/controllers/service_controller.dart';
 import '../../../../../core/controllers/news_controller.dart';
+import '../../../../../core/controllers/area_controller.dart';
 
 class DesaDataPage extends StatefulWidget {
   const DesaDataPage({super.key});
@@ -16,6 +17,7 @@ class _DesaDataPageState extends State<DesaDataPage> {
   final userController = UserController();
   final serviceController = ServiceController();
   final newsController = NewsController();
+  final areaController = AreaController();
 
   @override
   Widget build(BuildContext context) {
@@ -67,6 +69,25 @@ class _DesaDataPageState extends State<DesaDataPage> {
                         buttonColor: const Color(0xFF00194A),
                         buttonTextColor: Colors.white,
                         onPressed: () => context.go('/pd/data/users'),
+                      );
+                    },
+                  ),
+                ),
+
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  child: StreamBuilder<int>(
+                    stream: areaController.getTotalAreas(),
+                    builder: (context, snapshot) {
+                      final total = snapshot.data ?? 0;
+                      return _buildDataCard(
+                        title: 'Data Wilayah',
+                        iconPath: 'assets/images/ic_users.png',
+                        total: total,
+                        color: const Color(0xFFCEDDFF),
+                        buttonColor: const Color(0xFF00194A),
+                        buttonTextColor: Colors.white,
+                        onPressed: () => context.go('/pd/data/areas'),
                       );
                     },
                   ),

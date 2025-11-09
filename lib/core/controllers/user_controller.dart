@@ -44,7 +44,6 @@ class UserController {
       email: email.trim(),
       password: password.trim(),
       role: role.trim(),
-      // field lain dianggap null/empty
       birthPlaceDate: '',
       religion: '',
       nationality: '',
@@ -165,5 +164,34 @@ class UserController {
         return User.fromMap(data);
       }).where((user) => user.username.toLowerCase().contains(keyword)).toList();
     });
+  }
+
+  Future<List<User>> getUsersByRole(String role) async {
+    final querySnapshot = await _firestore
+        .collection(collectionName)
+        .where('role', isEqualTo: role)
+        .get();
+
+    return querySnapshot.docs.map((doc) {
+      final data = doc.data();
+      data['id'] = doc.id;
+      return User.fromMap(data);
+    }).toList();
+  }
+
+  Future<String> getUsernameById(String userId) async {
+    try {
+      final doc = await _firestore.collection(collectionName).doc(userId).get();
+      if (doc.exists) {
+        final data = doc.data();
+        if (data != null && data.containsKey('username')) {
+          return data['username'] ?? 'Tidak diketahui';
+        }
+      }
+      return 'Tidak ditemukan';
+    } catch (e) {
+      debugPrint('Error mengambil username: $e');
+      return 'Error';
+    }
   }
 }

@@ -13,6 +13,8 @@ import 'modules/perangkat_desa/pages/pd_akun_profil_form.dart';
 import 'modules/perangkat_desa/pages/pd_akun_change_password.dart';
 import 'modules/perangkat_desa/pages/data/users/pd_users.dart';
 import 'modules/perangkat_desa/pages/data/users/pd_users_form.dart';
+import 'modules/perangkat_desa/pages/data/areas/pd_areas.dart';
+import 'modules/perangkat_desa/pages/data/areas/pd_areas_form.dart';
 import 'modules/perangkat_desa/pages/data/services/pd_services.dart';
 import 'modules/perangkat_desa/pages/data/services/pd_services_form.dart';
 import 'modules/perangkat_desa/pages/data/news/pd_news.dart';
@@ -47,6 +49,9 @@ final GoRouter appRouter = GoRouter(
         GoRoute(path: '/pd/data/users', builder: (_, __) => const DesaDataUsersPage()),
         GoRoute(path: '/pd/data/users/add', builder: (_, __) => const DesaDataUsersFormPage()),
         GoRoute(path: '/pd/data/users/edit', builder: (context, state) => DesaDataUsersFormPage(id: state.uri.queryParameters['id'])),
+        GoRoute(path: '/pd/data/areas', builder: (_, __) => const DesaDataAreasPage()),
+        GoRoute(path: '/pd/data/areas/add', builder: (_, __) => const DesaDataAreasFormPage()),
+        GoRoute(path: '/pd/data/areas/edit', builder: (context, state) => DesaDataAreasFormPage(id: state.uri.queryParameters['id'])),
         GoRoute(path: '/pd/data/services', builder: (_, __) => const DesaDataServicesPage()),
         GoRoute(path: '/pd/data/services/add', builder: (_, __) => const DesaDataServicesFormPage()),
         GoRoute(path: '/pd/data/services/edit', builder: (context, state) => DesaDataServicesFormPage(id: state.uri.queryParameters['id'])),
