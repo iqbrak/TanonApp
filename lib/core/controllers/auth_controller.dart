@@ -103,7 +103,7 @@ class AuthController {
       final role = userDoc.data()!['role'] ?? 'Perangkat Desa';
 
       if (role == 'Warga') {
-        context.go('/wg/main');
+        context.go('/wg/beranda');
       } else if (role == 'RT') {
         context.go('/rt/main');
       } else {

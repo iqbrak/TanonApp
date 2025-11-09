@@ -21,7 +21,13 @@ import 'modules/perangkat_desa/pages/data/news/pd_news.dart';
 import 'modules/perangkat_desa/pages/data/news/pd_news_form.dart';
 import 'modules/perangkat_desa/pages/pd_data_requests.dart';
 import 'modules/perangkat_desa/pages/pd_berita_detail.dart';
+
 import 'modules/warga/wg_main.dart';
+import 'modules/warga/pages/wg_beranda.dart';
+import 'modules/warga/pages/wg_pengajuan.dart';
+import 'modules/warga/pages/wg_berita.dart';
+import 'modules/warga/pages/wg_akun.dart';
+
 import 'modules/rt/rt_main.dart';
 
 final _authController = AuthController();
@@ -70,8 +76,17 @@ final GoRouter appRouter = GoRouter(
       ],
     ),
 
-    // Warga dan RT
-    GoRoute(path: '/wg/main', builder: (_, __) => const WargaMain()),
+    // Warga 
+    ShellRoute(
+      builder: (context, state, child) => WargaMain(child: child),
+      routes: [
+        GoRoute(path: '/wg/beranda', builder: (_, __) => WargaBerandaPage()),
+        GoRoute(path: '/wg/pengajuan', builder: (_, __) => WargaPengajuanPage()),
+        GoRoute(path: '/wg/berita', builder: (_, __) => WargaBeritaPage()),
+        GoRoute(path: '/wg/akun', builder: (_, __) => WargaAkunPage()),
+      ],
+    ),
+
     GoRoute(path: '/rt/main', builder: (_, __) => const RTMain()),
   ],
 );

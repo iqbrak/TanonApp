@@ -93,6 +93,8 @@ class _DesaDataNewsPageState extends State<DesaDataNewsPage> {
                   return ListView.builder(
                     padding: const EdgeInsets.only(bottom: 80),
                     itemCount: items.length,
+                    shrinkWrap: true,
+                    physics: const BouncingScrollPhysics(),
                     itemBuilder: (context, index) {
                       final item = items[index];
                       return Padding(
