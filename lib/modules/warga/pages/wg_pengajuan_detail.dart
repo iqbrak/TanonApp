@@ -103,44 +103,145 @@ class WargaPengajuanDetailPage extends StatelessWidget {
                         const SizedBox(height: 24),
 
                         Center(
-                          child: ElevatedButton.icon(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF245BCA),
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 14,
-                                horizontal: 28,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-                              elevation: 3,
-                            ),
-                            onPressed: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    'Sedang mengunduh...',
+                          child: Builder(
+                            builder: (context) {
+                              final lowerStatus = status.toLowerCase();
+
+                              if (lowerStatus == 'disetujui' || lowerStatus == 'selesai') {
+                                return ElevatedButton.icon(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFF245BCA),
+                                    padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 28),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(14),
+                                    ),
+                                    elevation: 3,
+                                  ),
+                                  onPressed: () {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          'Sedang mengunduh...',
+                                          style: GoogleFonts.poppins(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                        backgroundColor: const Color(0xFF245BCA),
+                                        duration: const Duration(seconds: 2),
+                                      ),
+                                    );
+                                  },
+                                  icon: const Icon(Icons.download_rounded,
+                                      color: Colors.white, size: 20),
+                                  label: Text(
+                                    "Unduh Pengajuan",
                                     style: GoogleFonts.poppins(
+                                      fontWeight: FontWeight.w600,
                                       color: Colors.white,
-                                      fontWeight: FontWeight.w500,
+                                      fontSize: 13,
+                                      letterSpacing: 0.3,
                                     ),
                                   ),
-                                  backgroundColor: const Color(0xFF245BCA),
-                                  duration: const Duration(seconds: 2),
-                                ),
-                              );
+                                );
+                              }
+
+                              else if (lowerStatus == 'ditolak') {
+                                return ElevatedButton.icon(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.red[700],
+                                    padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 28),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(14),
+                                    ),
+                                    elevation: 3,
+                                  ),
+                                  onPressed: () {
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) => AlertDialog(
+                                        shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(20)),
+                                        title: Text(
+                                          'Catatan',
+                                          style: GoogleFonts.poppins(
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.red[700],
+                                          ),
+                                        ),
+                                        content: Text(
+                                          data['alasan'] ??
+                                              'Pengajuan ditolak karena data tidak lengkap atau tidak valid.',
+                                          style: GoogleFonts.poppins(fontSize: 13),
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                            child: Text(
+                                              'Tutup',
+                                              style: GoogleFonts.poppins(
+                                                color: Colors.red[700],
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                            onPressed: () => Navigator.pop(context),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                  icon: const Icon(Icons.info_outline_rounded,
+                                      color: Colors.white, size: 20),
+                                  label: Text(
+                                    "Lihat Catatan",
+                                    style: GoogleFonts.poppins(
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.white,
+                                      fontSize: 13,
+                                      letterSpacing: 0.3,
+                                    ),
+                                  ),
+                                );
+                              }
+
+                              else {
+                                return ElevatedButton.icon(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.orange[700],
+                                    padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 28),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(14),
+                                    ),
+                                    elevation: 3,
+                                  ),
+                                  onPressed: () {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          'Pengajuan dibatalkan.',
+                                          style: GoogleFonts.poppins(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                        backgroundColor: Colors.orange[700],
+                                        duration: const Duration(seconds: 2),
+                                      ),
+                                    );
+                                  },
+                                  icon: const Icon(Icons.cancel_outlined,
+                                      color: Colors.white, size: 20),
+                                  label: Text(
+                                    "Batalkan Pengajuan",
+                                    style: GoogleFonts.poppins(
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.white,
+                                      fontSize: 13,
+                                      letterSpacing: 0.3,
+                                    ),
+                                  ),
+                                );
+                              }
                             },
-                            icon: const Icon(Icons.download_rounded,
-                                color: Colors.white, size: 20),
-                            label: Text(
-                              "Unduh Pengajuan",
-                              style: GoogleFonts.poppins(
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
-                                fontSize: 13,
-                                letterSpacing: 0.3,
-                              ),
-                            ),
                           ),
                         ),
                       ],
