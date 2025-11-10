@@ -1,12 +1,16 @@
 import 'package:go_router/go_router.dart';
+
 import 'core/controllers/auth_controller.dart';
 import 'modules/auth/login.dart';
 import 'modules/auth/register.dart';
 import 'modules/auth/forgot_password.dart';
+
+import 'modules/shared/pages/berita/berita.dart';
+import 'modules/shared/pages/berita/berita_detail.dart';
+
 import 'modules/perangkat_desa/pd_main.dart';
 import 'modules/perangkat_desa/pages/pd_beranda.dart';
 import 'modules/perangkat_desa/pages/pd_data.dart';
-import 'modules/perangkat_desa/pages/pd_berita.dart';
 import 'modules/perangkat_desa/pages/pd_akun.dart';
 import 'modules/perangkat_desa/pages/pd_akun_profil.dart';
 import 'modules/perangkat_desa/pages/pd_akun_profil_form.dart';
@@ -20,12 +24,10 @@ import 'modules/perangkat_desa/pages/data/services/pd_services_form.dart';
 import 'modules/perangkat_desa/pages/data/news/pd_news.dart';
 import 'modules/perangkat_desa/pages/data/news/pd_news_form.dart';
 import 'modules/perangkat_desa/pages/pd_data_requests.dart';
-import 'modules/perangkat_desa/pages/pd_berita_detail.dart';
 
 import 'modules/warga/wg_main.dart';
 import 'modules/warga/pages/wg_beranda.dart';
 import 'modules/warga/pages/wg_pengajuan.dart';
-import 'modules/warga/pages/wg_berita.dart';
 import 'modules/warga/pages/wg_akun.dart';
 import 'modules/warga/pages/wg_pengajuan_form.dart';
 import 'modules/warga/pages/wg_pengajuan_success.dart';
@@ -50,11 +52,6 @@ final GoRouter appRouter = GoRouter(
       routes: [
         GoRoute(path: '/pd/beranda', builder: (_, __) => DesaBerandaPage()),
         GoRoute(path: '/pd/data', builder: (_, __) => const DesaDataPage()),
-        GoRoute(path: '/pd/berita', builder: (_, __) => DesaBeritaPage()),
-        GoRoute(path: '/pd/akun', builder: (_, __) => DesaAkunPage()),
-        GoRoute(path: '/pd/akun/profil', builder: (_, __) => const DesaAkunProfilPage()),
-        GoRoute(path: '/pd/akun/profil/form', builder: (_, __) => const DesaAkunProfilFormPage()),
-        GoRoute(path: '/pd/akun/password', builder: (_, __) => const DesaAkunChangePasswordPage()),
         GoRoute(path: '/pd/data/users', builder: (_, __) => const DesaDataUsersPage()),
         GoRoute(path: '/pd/data/users/add', builder: (_, __) => const DesaDataUsersFormPage()),
         GoRoute(path: '/pd/data/users/edit', builder: (context, state) => DesaDataUsersFormPage(id: state.uri.queryParameters['id'])),
@@ -68,14 +65,19 @@ final GoRouter appRouter = GoRouter(
         GoRoute(path: '/pd/data/news/add', builder: (_, __) => const DesaDataNewsFormPage()),
         GoRoute(path: '/pd/data/news/edit', builder: (context, state) => DesaDataNewsFormPage(id: state.uri.queryParameters['id'])),
         GoRoute(path: '/pd/data/requests', builder: (_, __) => const DesaDataRequestsPage()),
-
+        GoRoute(path: '/pd/berita', builder: (_, __) => BeritaPage()),
         GoRoute(
           path: '/pd/berita/detail',
           builder: (context, state) {
-            final newsId = state.extra as String; 
-            return DesaBeritaDetailPage(newsId: newsId);
+            final extra = state.extra as Map<String, dynamic>? ?? {};
+            final newsId = extra['newsId'] as String;
+            return BeritaDetailPage(newsId: newsId);
           },
-        ),  
+        ),
+        GoRoute(path: '/pd/akun', builder: (_, __) => DesaAkunPage()),
+        GoRoute(path: '/pd/akun/profil', builder: (_, __) => const DesaAkunProfilPage()),
+        GoRoute(path: '/pd/akun/profil/form', builder: (_, __) => const DesaAkunProfilFormPage()),
+        GoRoute(path: '/pd/akun/password', builder: (_, __) => const DesaAkunChangePasswordPage()),
       ],
     ),
 
@@ -84,10 +86,7 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state, child) => WargaMain(child: child),
       routes: [
         GoRoute(path: '/wg/beranda', builder: (_, __) => WargaBerandaPage()),
-        GoRoute(path: '/wg/pengajuan', builder: (_, __) => WargaPengajuanPage()),
-        GoRoute(path: '/wg/berita', builder: (_, __) => WargaBeritaPage()),
-        GoRoute(path: '/wg/akun', builder: (_, __) => WargaAkunPage()),
-        GoRoute(path: '/wg/pengajuan/add', builder: (_, __) => const WargaPengajuanFormPage()),
+        GoRoute(path: '/wg/pengajuan', builder: (_, __) => WargaPengajuanPage()),GoRoute(path: '/wg/pengajuan/add', builder: (_, __) => const WargaPengajuanFormPage()),
         GoRoute(path: '/wg/pengajuan/success', builder: (_, __) => const WargaPengajuanSuccessPage()),
         GoRoute(
           path: '/wg/pengajuan/detail',
@@ -96,6 +95,17 @@ final GoRouter appRouter = GoRouter(
             return WargaPengajuanDetailPage(data: data);
           },
         ),
+        GoRoute(path: '/wg/berita', builder: (_, __) => BeritaPage()),
+        GoRoute(
+          path: '/wg/berita/detail',
+          builder: (context, state) {
+            final extra = state.extra as Map<String, dynamic>? ?? {};
+            final newsId = extra['newsId'] as String;
+            return BeritaDetailPage(newsId: newsId);
+          },
+        ),
+
+        GoRoute(path: '/wg/akun', builder: (_, __) => WargaAkunPage()),
       ],
     ),
 

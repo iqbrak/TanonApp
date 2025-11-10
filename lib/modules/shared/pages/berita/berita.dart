@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/controllers/news_controller.dart';
-import '../../../core/models/news.dart';
+import '../../../../core/controllers/news_controller.dart';
+import '../../../../core/controllers/auth_controller.dart';
+import '../../../../core/models/news.dart';
 
-class DesaBeritaPage extends StatelessWidget {
+class BeritaPage extends StatelessWidget {
   final NewsController _newsController = NewsController();
+  final AuthController _authController = AuthController();
   
-  DesaBeritaPage({super.key});
+  BeritaPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -104,7 +106,13 @@ class DesaBeritaPage extends StatelessWidget {
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 10.0),
                         child: GestureDetector(
-                          onTap: () => context.go('/pd/berita/detail', extra: berita.id),
+                          onTap: () => context.go(
+                            '/${_authController.currentUserRole == 'Warga' ? 'wg' : 'pd'}/berita/detail',
+                            extra: {
+                              'newsId': berita.id,
+                              'from': '/${_authController.getRoutePrefix()}/berita',
+                            },
+                          ),
                           child: _buildBeritaCard(context, berita),
                         ),
                       );
@@ -119,7 +127,7 @@ class DesaBeritaPage extends StatelessWidget {
     );
   }
 
-Widget _buildBeritaCard(BuildContext context, News berita) {
+  Widget _buildBeritaCard(BuildContext context, News berita) {
     return Container(
       height: 100,
       decoration: BoxDecoration(

@@ -182,4 +182,27 @@ class AuthController {
 
     return null; 
   }
+
+  String? _cachedRole; 
+
+  Future<void> cacheUserRole() async {
+    final user = currentUser;
+    if (user != null) {
+      final doc = await _firestore.collection('users').doc(user.uid).get();
+      _cachedRole = doc.data()?['role'] ?? 'Perangkat Desa';
+    }
+  }
+
+  String get currentUserRole => _cachedRole ?? 'Perangkat Desa';
+
+  String getRoutePrefix() {
+  switch (_cachedRole) {
+    case 'Warga':
+      return 'wg';
+    case 'RT':
+      return 'rt';
+    default:
+      return 'pd'; 
+  }
+}
 }
