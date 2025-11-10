@@ -2,18 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/controllers/auth_controller.dart';
 
-class DesaAkunChangePasswordPage extends StatefulWidget {
-  const DesaAkunChangePasswordPage({super.key});
+class AkunChangePasswordPage extends StatefulWidget {
+  final String routePrefix;
+  const AkunChangePasswordPage({super.key, required this.routePrefix});
 
   @override
-  State<DesaAkunChangePasswordPage> createState() =>
-      _DesaAkunChangePasswordPageState();
+  State<AkunChangePasswordPage> createState() =>
+      _AkunChangePasswordPageState();
 }
 
-class _DesaAkunChangePasswordPageState extends State<DesaAkunChangePasswordPage> {
+class _AkunChangePasswordPageState extends State<AkunChangePasswordPage> {
   final _formKey = GlobalKey<FormState>();
   final _auth = FirebaseAuth.instance;
+  final _authController = AuthController();
+  late String _defaultBackRoute;
 
   final TextEditingController oldPasswordController = TextEditingController();
   final TextEditingController newPasswordController = TextEditingController();
@@ -21,6 +25,17 @@ class _DesaAkunChangePasswordPageState extends State<DesaAkunChangePasswordPage>
       TextEditingController();
 
   bool isLoading = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final extra = GoRouterState.of(context).extra;
+    if (extra != null && extra is Map<String, dynamic> && extra.containsKey('from')) {
+      _defaultBackRoute = extra['from'] as String;
+    } else {
+      _defaultBackRoute = '/${_authController.getRoutePrefix()}/akun';
+    }
+  }
 
   @override
   void dispose() {
@@ -51,7 +66,7 @@ class _DesaAkunChangePasswordPageState extends State<DesaAkunChangePasswordPage>
       );
 
       Future.delayed(const Duration(milliseconds: 300), () {
-        if (mounted) context.go('/pd/akun');
+        if (mounted) context.go(_defaultBackRoute);
       });
 
     } on FirebaseAuthException catch (e) {
@@ -107,7 +122,9 @@ class _DesaAkunChangePasswordPageState extends State<DesaAkunChangePasswordPage>
         elevation: 1,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Color(0xFF00194A)),
-          onPressed: () => context.go('/pd/akun'),
+          onPressed: () {
+            context.go(_defaultBackRoute);
+          },
         ),
         title: Text(
           "Ubah Password",

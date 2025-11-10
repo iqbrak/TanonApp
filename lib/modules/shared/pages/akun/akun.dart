@@ -3,9 +3,11 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../../core/controllers/auth_controller.dart';
 
-class WargaAkunPage extends StatelessWidget {
-  final authController = AuthController();
-  WargaAkunPage({super.key});
+class AkunPage extends StatelessWidget {
+  final String routePrefix;
+  final _authController = AuthController();
+
+  AkunPage({super.key, required this.routePrefix});
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +67,7 @@ class WargaAkunPage extends StatelessWidget {
                               child: Icon(Icons.person, color: Color(0xFF4E82EA)),
                             ),
                             title: Text(
-                              'Safira Nabila',
+                              'Iqbra Kurniawan',
                               style: GoogleFonts.poppins(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
@@ -103,8 +105,7 @@ class WargaAkunPage extends StatelessWidget {
               width: double.infinity,
               child: ElevatedButton.icon(
                 onPressed: () async {
-                  await authController.logout();
-                  
+                  await _authController.logout();
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Berhasil logout')),
                   );
@@ -171,7 +172,12 @@ class WargaAkunPage extends StatelessWidget {
                 ),
               ),
               trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
-              onTap: () => context.go('/wg/akun/profil'),
+              onTap: () {
+                context.go(
+                  '/$routePrefix/akun/profil',
+                  extra: {'from': '/$routePrefix/akun'},
+                );
+              },
             ),
             const Divider(height: 1, color: Colors.grey),
             ListTile(
@@ -185,7 +191,12 @@ class WargaAkunPage extends StatelessWidget {
                 ),
               ),
               trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
-              onTap: () => context.go('/wg/akun/password'),
+              onTap: () {
+                context.go(
+                  '/$routePrefix/akun/password',
+                  extra: {'from': '/$routePrefix/akun'},
+                );
+              },
             ),
           ],
         ),
@@ -214,7 +225,7 @@ class WargaAkunPage extends StatelessWidget {
                 ),
               ),
               trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
-              onTap: () => context.go('/wg/akun/desa'),
+              onTap: () => context.go('/pd/akun/desa'),
             ),
             const Divider(height: 1, color: Colors.grey),
             ListTile(
@@ -228,7 +239,7 @@ class WargaAkunPage extends StatelessWidget {
                 ),
               ),
               trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
-              onTap: () => context.go('/wg/akun/aplikasi'),
+              onTap: () => context.go('/pd/akun/aplikasi'),
             ),
             const Divider(height: 1, color: Colors.grey),
             ListTile(
@@ -242,7 +253,7 @@ class WargaAkunPage extends StatelessWidget {
                 ),
               ),
               trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
-              onTap: () => context.go('/wg/akun/panduan'),
+              onTap: () => context.go('/pd/akun/panduan'),
             ),
             const Divider(height: 1, color: Colors.grey),
             ListTile(
@@ -256,7 +267,7 @@ class WargaAkunPage extends StatelessWidget {
                 ),
               ),
               trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
-              onTap: () => context.go('/wg/akun/pengaduan'),
+              onTap: () => context.go('/pd/akun/pengaduan'),
             ),
           ],
         ),

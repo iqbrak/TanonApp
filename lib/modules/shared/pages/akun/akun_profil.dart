@@ -3,17 +3,22 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/controllers/auth_controller.dart';
 
-class DesaAkunProfilPage extends StatefulWidget {
-  const DesaAkunProfilPage({super.key});
+class AkunProfilPage extends StatefulWidget {
+  final String routePrefix;
+  const AkunProfilPage({super.key, required this.routePrefix});
 
   @override
-  State<DesaAkunProfilPage> createState() => _DesaAkunProfilPageState();
+  State<AkunProfilPage> createState() => _AkunProfilPageState();
 }
 
-class _DesaAkunProfilPageState extends State<DesaAkunProfilPage> {
+class _AkunProfilPageState extends State<AkunProfilPage> {
   final _auth = FirebaseAuth.instance;
   final _firestore = FirebaseFirestore.instance;
+  final _authController = AuthController();
+
+  late String _defaultBackRoute;
   Map<String, dynamic>? _userData;
   bool _loading = true;
 
@@ -21,6 +26,17 @@ class _DesaAkunProfilPageState extends State<DesaAkunProfilPage> {
   void initState() {
     super.initState();
     _loadUserData();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final extra = GoRouterState.of(context).extra;
+    if (extra != null && extra is Map<String, dynamic> && extra.containsKey('from')) {
+      _defaultBackRoute = extra['from'] as String;
+    } else {
+      _defaultBackRoute = '/${_authController.getRoutePrefix()}/akun';
+    }
   }
 
   Future<void> _loadUserData() async {
@@ -31,25 +47,18 @@ class _DesaAkunProfilPageState extends State<DesaAkunProfilPage> {
 
     if (!mounted) return;
 
-    if (doc.exists) {
-      setState(() {
-        _userData = doc.data();
-        _loading = false;
-      });
-    } else {
-      setState(() => _loading = false);
-    }
+    setState(() {
+      _userData = doc.exists ? doc.data() : null;
+      _loading = false;
+    });
   }
 
   String _formatAddress(String address) {
     if (address.isEmpty || address == '-') return '-';
-
     final parts = address.split(',').map((e) => e.trim()).toList();
-
     String rt = parts.isNotEmpty ? parts[0] : '-';
     String rw = parts.length > 1 ? parts[1] : '-';
     String dusun = parts.length > 2 ? parts[2] : '-';
-
     return 'RT $rt/ RW $rw, Dsn. $dusun';
   }
 
@@ -67,7 +76,7 @@ class _DesaAkunProfilPageState extends State<DesaAkunProfilPage> {
                     children: [
                       Container(
                         width: double.infinity,
-                        height: 150,
+                        height: 120,
                         decoration: const BoxDecoration(
                           image: DecorationImage(
                             image: AssetImage('assets/images/bg_top.png'),
@@ -75,22 +84,41 @@ class _DesaAkunProfilPageState extends State<DesaAkunProfilPage> {
                           ),
                         ),
                       ),
-                      Positioned(
-                        top: 40,
-                        left: 16,
-                        right: 16,
-                        child: Column(
-                          children: [
-                            Text(
-                              'Profil Saya',
-                              style: GoogleFonts.poppins(
-                                color: const Color(0xFF00194A),
-                                fontSize: 24,
-                                fontWeight: FontWeight.w600,
+                      SafeArea(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              Align(
+                                alignment: Alignment.centerLeft,
+                                child: CircleAvatar(
+                                  backgroundColor: Colors.white,
+                                  child: IconButton(
+                                    icon: const Icon(Icons.arrow_back, color: Color(0xFF245BCA)),
+                                    onPressed: () {
+                                      context.go(_defaultBackRoute);
+                                    },
+                                  ),
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 60),
-                          ],
+                              Text(
+                                'Profil Saya',
+                                style: GoogleFonts.poppins(
+                                  color: Colors.white,
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.w600,
+                                  shadows: [
+                                    Shadow(
+                                      color: Colors.black.withOpacity(0.3),
+                                      offset: const Offset(0, 1),
+                                      blurRadius: 2,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ],
@@ -160,7 +188,10 @@ class _DesaAkunProfilPageState extends State<DesaAkunProfilPage> {
                             width: double.infinity,
                             child: ElevatedButton.icon(
                               onPressed: () {
-                                context.go('/pd/akun/profil/form');
+                                context.push(
+                                  '/${widget.routePrefix}/akun/profil/form',
+                                  extra: {'from': '/${widget.routePrefix}/akun/profil', 'prefix': widget.routePrefix},
+                                );
                               },
                               icon: const Icon(Icons.edit, color: Colors.white),
                               label: Text(

@@ -196,13 +196,10 @@ class AuthController {
   String get currentUserRole => _cachedRole ?? 'Perangkat Desa';
 
   String getRoutePrefix() {
-  switch (_cachedRole) {
-    case 'Warga':
-      return 'wg';
-    case 'RT':
-      return 'rt';
-    default:
-      return 'pd'; 
-  }
+  final role = currentUserRole;
+  if (role == 'Perangkat Desa') return 'pd';
+  if (role == 'Warga') return 'wg';
+  if (role == 'RT') return 'rt';
+  return 'wg'; 
 }
 }

@@ -1,20 +1,20 @@
 import 'package:go_router/go_router.dart';
-
 import 'core/controllers/auth_controller.dart';
+
 import 'modules/auth/login.dart';
 import 'modules/auth/register.dart';
 import 'modules/auth/forgot_password.dart';
 
 import 'modules/shared/pages/berita/berita.dart';
 import 'modules/shared/pages/berita/berita_detail.dart';
+import 'modules/shared/pages/akun/akun.dart';
+import 'modules/shared/pages/akun/akun_profil.dart';
+import 'modules/shared/pages/akun/akun_profil_form.dart';
+import 'modules/shared/pages/akun/akun_change_password.dart';
 
 import 'modules/perangkat_desa/pd_main.dart';
 import 'modules/perangkat_desa/pages/pd_beranda.dart';
 import 'modules/perangkat_desa/pages/pd_data.dart';
-import 'modules/perangkat_desa/pages/pd_akun.dart';
-import 'modules/perangkat_desa/pages/pd_akun_profil.dart';
-import 'modules/perangkat_desa/pages/pd_akun_profil_form.dart';
-import 'modules/perangkat_desa/pages/pd_akun_change_password.dart';
 import 'modules/perangkat_desa/pages/data/users/pd_users.dart';
 import 'modules/perangkat_desa/pages/data/users/pd_users_form.dart';
 import 'modules/perangkat_desa/pages/data/areas/pd_areas.dart';
@@ -28,7 +28,6 @@ import 'modules/perangkat_desa/pages/pd_data_requests.dart';
 import 'modules/warga/wg_main.dart';
 import 'modules/warga/pages/wg_beranda.dart';
 import 'modules/warga/pages/wg_pengajuan.dart';
-import 'modules/warga/pages/wg_akun.dart';
 import 'modules/warga/pages/wg_pengajuan_form.dart';
 import 'modules/warga/pages/wg_pengajuan_success.dart';
 import 'modules/warga/pages/wg_pengajuan_detail.dart';
@@ -65,6 +64,7 @@ final GoRouter appRouter = GoRouter(
         GoRoute(path: '/pd/data/news/add', builder: (_, __) => const DesaDataNewsFormPage()),
         GoRoute(path: '/pd/data/news/edit', builder: (context, state) => DesaDataNewsFormPage(id: state.uri.queryParameters['id'])),
         GoRoute(path: '/pd/data/requests', builder: (_, __) => const DesaDataRequestsPage()),
+
         GoRoute(path: '/pd/berita', builder: (_, __) => BeritaPage()),
         GoRoute(
           path: '/pd/berita/detail',
@@ -74,10 +74,11 @@ final GoRouter appRouter = GoRouter(
             return BeritaDetailPage(newsId: newsId);
           },
         ),
-        GoRoute(path: '/pd/akun', builder: (_, __) => DesaAkunPage()),
-        GoRoute(path: '/pd/akun/profil', builder: (_, __) => const DesaAkunProfilPage()),
-        GoRoute(path: '/pd/akun/profil/form', builder: (_, __) => const DesaAkunProfilFormPage()),
-        GoRoute(path: '/pd/akun/password', builder: (_, __) => const DesaAkunChangePasswordPage()),
+
+        GoRoute(path: '/pd/akun', builder: (_, __) => AkunPage(routePrefix: 'pd')),
+        GoRoute(path: '/pd/akun/profil', builder: (_, __) => const AkunProfilPage(routePrefix: 'pd')),
+        GoRoute(path: '/pd/akun/profil/form', builder: (_, __) => const AkunProfilFormPage(routePrefix: 'pd')),
+        GoRoute(path: '/pd/akun/password', builder: (_, __) => const AkunChangePasswordPage(routePrefix: 'pd')),
       ],
     ),
 
@@ -86,7 +87,8 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state, child) => WargaMain(child: child),
       routes: [
         GoRoute(path: '/wg/beranda', builder: (_, __) => WargaBerandaPage()),
-        GoRoute(path: '/wg/pengajuan', builder: (_, __) => WargaPengajuanPage()),GoRoute(path: '/wg/pengajuan/add', builder: (_, __) => const WargaPengajuanFormPage()),
+        GoRoute(path: '/wg/pengajuan', builder: (_, __) => WargaPengajuanPage()),
+        GoRoute(path: '/wg/pengajuan/add', builder: (_, __) => const WargaPengajuanFormPage()),
         GoRoute(path: '/wg/pengajuan/success', builder: (_, __) => const WargaPengajuanSuccessPage()),
         GoRoute(
           path: '/wg/pengajuan/detail',
@@ -105,7 +107,10 @@ final GoRouter appRouter = GoRouter(
           },
         ),
 
-        GoRoute(path: '/wg/akun', builder: (_, __) => WargaAkunPage()),
+        GoRoute(path: '/wg/akun', builder: (_, __) => AkunPage(routePrefix: 'wg')),
+        GoRoute(path: '/wg/akun/profil', builder: (_, __) => const AkunProfilPage(routePrefix: 'wg')),
+        GoRoute(path: '/wg/akun/profil/form', builder: (_, __) => const AkunProfilFormPage(routePrefix: 'wg')),
+        GoRoute(path: '/wg/akun/password', builder: (_, __) => const AkunChangePasswordPage(routePrefix: 'wg')),
       ],
     ),
 

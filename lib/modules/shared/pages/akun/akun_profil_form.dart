@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../../../../../core/controllers/user_controller.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../../core/controllers/user_controller.dart';
 
-class DesaAkunProfilFormPage extends StatefulWidget {
-  const DesaAkunProfilFormPage({super.key});
+class AkunProfilFormPage extends StatefulWidget {
+  final String routePrefix;
+  const AkunProfilFormPage({super.key, required this.routePrefix});
 
   @override
-  State<DesaAkunProfilFormPage> createState() => _DesaAkunProfilFormPageState();
+  State<AkunProfilFormPage> createState() => _AkunProfilFormPageState();
 }
 
-class _DesaAkunProfilFormPageState extends State<DesaAkunProfilFormPage> {
+class _AkunProfilFormPageState extends State<AkunProfilFormPage> {
   final _formKey = GlobalKey<FormState>();
   final controller = UserController();
-
+  
   late TextEditingController usernameController;
   late TextEditingController emailController;
   late TextEditingController passwordController;
@@ -50,13 +51,11 @@ class _DesaAkunProfilFormPageState extends State<DesaAkunProfilFormPage> {
 
     _loadUser();
   }
-
+  
   Future<void> _loadUser() async {
     final currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser == null) {
-      setState(() {
-        isLoading = false;
-      });
+      setState(() => isLoading = false);
       return;
     }
     userId = currentUser.uid;
@@ -96,9 +95,7 @@ class _DesaAkunProfilFormPageState extends State<DesaAkunProfilFormPage> {
 
       phoneController.text = user.phone;
     }
-    setState(() {
-      isLoading = false;
-    });
+    setState(() => isLoading = false);
   }
 
   @override
@@ -122,7 +119,6 @@ class _DesaAkunProfilFormPageState extends State<DesaAkunProfilFormPage> {
     try {
       String address =
           "${rtController.text.trim()}, ${rwController.text.trim()}, ${dusunController.text.trim()}";
-      String rt = rtController.text.trim();
 
       await controller.updateUser(
         id: userId!,
@@ -135,7 +131,7 @@ class _DesaAkunProfilFormPageState extends State<DesaAkunProfilFormPage> {
         nationality: selectedNationality!,
         occupation: occupationController.text,
         maritalStatus: selectedMaritalStatus!,
-        rt: rt,
+        rt: rtController.text.trim(),
         address: address,
         phone: phoneController.text,
         role: selectedRole!,
@@ -145,7 +141,7 @@ class _DesaAkunProfilFormPageState extends State<DesaAkunProfilFormPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Profil berhasil diperbarui')),
       );
-      context.go('/pd/akun/profil');
+      context.pop();
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context)
@@ -167,9 +163,12 @@ class _DesaAkunProfilFormPageState extends State<DesaAkunProfilFormPage> {
         backgroundColor: Colors.white,
         elevation: 1,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF00194A)),
-          onPressed: () => Navigator.pop(context),
+          icon: const Icon(Icons.arrow_back, color: Color(0xFF245BCA)),
+          onPressed: () { 
+            context.pop();
+          },
         ),
+
         title: Text(
           "Ubah Profil",
           style: GoogleFonts.poppins(
