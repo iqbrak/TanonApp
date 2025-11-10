@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../../../../../core/controllers/request_controller.dart';
 
 class WargaPengajuanFormPage extends StatefulWidget {
   const WargaPengajuanFormPage({super.key});
@@ -12,61 +15,108 @@ class WargaPengajuanFormPage extends StatefulWidget {
 class _WargaPengajuanFormPageState extends State<WargaPengajuanFormPage> {
   final _formKey = GlobalKey<FormState>();
 
-  final List<Map<String, dynamic>> services = [
-    {
-      'name': 'Pembuatan KTP Baru',
-      'requirements': [
-        'Fotokopi KTP/akta anggota keluarga',
-        'Fotokopi buku nikah/akta perkawinan jika sudah menikah',
-        'Fotokopi akta perceraian jika berlaku',
-        'Fotokopi ijazah terakhir anggota keluarga',
-      ],
-    },
-    {
-      'name': 'Pembuatan KK Baru',
-      'requirements': [
-        'Fotokopi KTP kepala keluarga',
-        'Surat pengantar dari RT/RW',
-        'Surat keterangan pindah jika dari luar daerah',
-      ],
-    },
-    {
-      'name': 'Perubahan Data KK',
-      'requirements': [
-        'KK lama',
-        'Dokumen pendukung perubahan (akta lahir, nikah, cerai)',
-      ],
-    },
-  ];
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final RequestController _requestController = RequestController();
 
-  String? selectedService;
+  String? selectedServiceId;
   List<String> selectedRequirements = [];
+  List<Map<String, dynamic>> services = [];
 
-  final TextEditingController nikController = TextEditingController();
-  final TextEditingController tempatLahirController = TextEditingController();
-  final TextEditingController tanggalLahirController = TextEditingController();
-  final TextEditingController jenisKelaminController = TextEditingController();
+  final TextEditingController usernameController = TextEditingController();
+  final TextEditingController birthPlaceDateController = TextEditingController();
+  final TextEditingController religionController = TextEditingController();
+  final TextEditingController nationalityController = TextEditingController();
+  final TextEditingController occupationController = TextEditingController();
+  final TextEditingController maritalStatusController = TextEditingController();
   final TextEditingController rtController = TextEditingController();
-  final TextEditingController rwController = TextEditingController();
-  final TextEditingController dusunController = TextEditingController();
-  final TextEditingController kewarganegaraanController = TextEditingController();
-  final TextEditingController agamaController = TextEditingController();
-  final TextEditingController pekerjaanController = TextEditingController();
-  final TextEditingController statusPerkawinanController = TextEditingController();
+  final TextEditingController addressController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadServices();
+    _loadUserData();
+  }
+
+  Future<void> _loadServices() async {
+    final snapshot = await _firestore.collection('services').get();
+    setState(() {
+      services = snapshot.docs.map((doc) {
+        return {
+          'id': doc.id,
+          'name': doc['name'] ?? '-',
+          'requirements': List<String>.from(doc['requirements'] ?? []),
+        };
+      }).toList();
+    });
+  }
+
+  Future<void> _loadUserData() async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    final doc = await _firestore.collection('users').doc(user.uid).get();
+    if (!doc.exists) return;
+
+    final data = doc.data()!;
+    setState(() {
+      usernameController.text = data['username'] ?? '';
+      birthPlaceDateController.text = data['birthPlaceDate'] ?? '';
+      religionController.text = data['religion'] ?? '';
+      nationalityController.text = data['nationality'] ?? '';
+      occupationController.text = data['occupation'] ?? '';
+      maritalStatusController.text = data['maritalStatus'] ?? '';
+      rtController.text = data['rt'] ?? '';
+      addressController.text = data['address'] ?? '';
+      phoneController.text = data['phone'] ?? '';
+    });
+  }
+
+  Future<void> _submitRequest() async {
+    if (!_formKey.currentState!.validate()) return;
+    if (selectedServiceId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Pilih keperluan terlebih dahulu")),
+      );
+      return;
+    }
+
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    final userDoc = await _firestore.collection('users').doc(user.uid).get();
+    final areaId = userDoc.data()?['areaId'] ?? '';
+
+    try {
+      await _requestController.addRequest(
+        userId: user.uid,
+        serviceId: selectedServiceId!,
+        areaId: areaId,
+        notes: null,
+      );
+
+      if (!mounted) return;
+      context.go('/wg/pengajuan/success');
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Gagal membuat pengajuan: $e")),
+      );
+    }
+  }
 
   @override
   void dispose() {
-    nikController.dispose();
-    tempatLahirController.dispose();
-    tanggalLahirController.dispose();
-    jenisKelaminController.dispose();
+    usernameController.dispose();
+    birthPlaceDateController.dispose();
+    religionController.dispose();
+    nationalityController.dispose();
+    occupationController.dispose();
+    maritalStatusController.dispose();
     rtController.dispose();
-    rwController.dispose();
-    dusunController.dispose();
-    kewarganegaraanController.dispose();
-    agamaController.dispose();
-    pekerjaanController.dispose();
-    statusPerkawinanController.dispose();
+    addressController.dispose();
+    phoneController.dispose();
     super.dispose();
   }
 
@@ -105,23 +155,22 @@ class _WargaPengajuanFormPageState extends State<WargaPengajuanFormPage> {
               const SizedBox(height: 8),
 
               DropdownButtonFormField<String>(
-                value: selectedService,
+                value: selectedServiceId,
                 decoration: const InputDecoration(
                   labelText: 'Keperluan',
                   border: OutlineInputBorder(),
                 ),
                 items: services.map<DropdownMenuItem<String>>((service) {
-                  final name = service['name'] as String;
                   return DropdownMenuItem<String>(
-                    value: name,
-                    child: Text(name),
+                    value: service['id'],
+                    child: Text(service['name']),
                   );
                 }).toList(),
                 onChanged: (value) {
                   setState(() {
-                    selectedService = value;
+                    selectedServiceId = value;
                     selectedRequirements = services
-                        .firstWhere((s) => s['name'] == value)['requirements']
+                        .firstWhere((s) => s['id'] == value)['requirements']
                         .cast<String>();
                   });
                 },
@@ -129,7 +178,7 @@ class _WargaPengajuanFormPageState extends State<WargaPengajuanFormPage> {
 
               const SizedBox(height: 12),
 
-              if (selectedService != null) ...[
+              if (selectedRequirements.isNotEmpty) ...[
                 Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
@@ -151,8 +200,7 @@ class _WargaPengajuanFormPageState extends State<WargaPengajuanFormPage> {
                       ...selectedRequirements.map((req) => Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text("• ",
-                                  style: TextStyle(fontSize: 12)),
+                              const Text("• ", style: TextStyle(fontSize: 12)),
                               Expanded(
                                 child: Text(req,
                                     style: GoogleFonts.poppins(
@@ -176,35 +224,23 @@ class _WargaPengajuanFormPageState extends State<WargaPengajuanFormPage> {
               ),
               const SizedBox(height: 8),
 
-              _buildTextField(nikController, 'NIK'),
+              _buildTextField(usernameController, 'Nama Lengkap'),
               const SizedBox(height: 10),
-              Row(
-                children: [
-                  Expanded(child: _buildTextField(tempatLahirController, 'Tempat Lahir')),
-                  const SizedBox(width: 8),
-                  Expanded(child: _buildTextField(tanggalLahirController, 'Tanggal Lahir')),
-                ],
-              ),
+              _buildTextField(birthPlaceDateController, 'Tempat / Tanggal Lahir'),
               const SizedBox(height: 10),
-              _buildTextField(jenisKelaminController, 'Jenis Kelamin'),
+              _buildTextField(religionController, 'Agama'),
               const SizedBox(height: 10),
-              Row(
-                children: [
-                  Expanded(child: _buildTextField(rtController, 'RT')),
-                  const SizedBox(width: 8),
-                  Expanded(child: _buildTextField(rwController, 'RW')),
-                  const SizedBox(width: 8),
-                  Expanded(child: _buildTextField(dusunController, 'Dusun')),
-                ],
-              ),
+              _buildTextField(nationalityController, 'Kewarganegaraan'),
               const SizedBox(height: 10),
-              _buildTextField(kewarganegaraanController, 'Kewarganegaraan'),
+              _buildTextField(occupationController, 'Pekerjaan'),
               const SizedBox(height: 10),
-              _buildTextField(agamaController, 'Agama'),
+              _buildTextField(maritalStatusController, 'Status Perkawinan'),
               const SizedBox(height: 10),
-              _buildTextField(pekerjaanController, 'Pekerjaan'),
+              _buildTextField(rtController, 'RT'),
               const SizedBox(height: 10),
-              _buildTextField(statusPerkawinanController, 'Status Perkawinan'),
+              _buildTextField(addressController, 'Alamat Lengkap'),
+              const SizedBox(height: 10),
+              _buildTextField(phoneController, 'Nomor Telepon'),
               const SizedBox(height: 24),
 
               ElevatedButton(
@@ -214,7 +250,7 @@ class _WargaPengajuanFormPageState extends State<WargaPengajuanFormPage> {
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),
                 ),
-                onPressed: () => context.go('/wg/pengajuan/success'),
+                onPressed: _submitRequest,
                 child: Text(
                   'Buat Pengajuan',
                   style: GoogleFonts.poppins(
@@ -233,6 +269,8 @@ class _WargaPengajuanFormPageState extends State<WargaPengajuanFormPage> {
   Widget _buildTextField(TextEditingController controller, String label) {
     return TextFormField(
       controller: controller,
+      validator: (value) =>
+          (value == null || value.trim().isEmpty) ? 'Kolom ini wajib diisi' : null,
       decoration: InputDecoration(
         labelText: label,
         border: const OutlineInputBorder(),

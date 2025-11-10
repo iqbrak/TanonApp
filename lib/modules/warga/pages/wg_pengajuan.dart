@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../../core/controllers/request_controller.dart';
+import '../../../../../core/models/request.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class WargaPengajuanPage extends StatefulWidget {
   const WargaPengajuanPage({super.key});
@@ -12,27 +15,12 @@ class WargaPengajuanPage extends StatefulWidget {
 class _WargaPengajuanPageState extends State<WargaPengajuanPage> {
   int selectedTabIndex = 0;
 
-  final List<Map<String, String>> dummyPengajuan = [
-    {
-      'requestName': 'Surat Keterangan Domisili',
-      'status': 'Sedang Diproses',
-    },
-    {
-      'requestName': 'Surat Keterangan Tidak Mampu',
-      'status': 'Menunggu Persetujuan',
-    },
-    {
-      'requestName': 'Surat Pengantar SKCK',
-      'status': 'Disetujui',
-    },
-    {
-      'requestName': 'Surat Izin Usaha Mikro',
-      'status': 'Ditolak',
-    },
-  ];
+  final _requestController = RequestController();
 
   @override
   Widget build(BuildContext context) {
+    final userId = FirebaseAuth.instance.currentUser?.uid ?? '';
+
     return Scaffold(
       backgroundColor: const Color(0xFFF2F6FF),
       body: Column(
@@ -65,7 +53,6 @@ class _WargaPengajuanPageState extends State<WargaPengajuanPage> {
                       ),
                     ),
                     const SizedBox(height: 10),
-
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Container(
@@ -150,29 +137,49 @@ class _WargaPengajuanPageState extends State<WargaPengajuanPage> {
           const SizedBox(height: 20),
 
           Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: ListView.builder(
-                padding: const EdgeInsets.only(bottom: 80),
-                itemCount: dummyPengajuan.length,
-                itemBuilder: (context, index) {
-                  final item = dummyPengajuan[index];
+            child: StreamBuilder<List<Request>>(
+              stream: _requestController.getRequestsByUser(userId),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-                  if (selectedTabIndex == 0 &&
-                      (item['status'] == 'Disetujui' || item['status'] == 'Ditolak')) {
-                    return const SizedBox.shrink();
-                  }
-                  if (selectedTabIndex == 1 &&
-                      (item['status'] != 'Disetujui' && item['status'] != 'Ditolak')) {
-                    return const SizedBox.shrink();
-                  }
-
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 10.0),
-                    child: _buildPengajuanCard(item),
+                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return Center(
+                    child: Text(
+                      'Belum ada pengajuan.',
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        color: Colors.grey[700],
+                      ),
+                    ),
                   );
-                },
-              ),
+                }
+
+                final requests = snapshot.data!;
+
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: ListView.builder(
+                    padding: const EdgeInsets.only(bottom: 80),
+                    itemCount: requests.length,
+                    itemBuilder: (context, index) {
+                      final item = requests[index];
+
+                      if (selectedTabIndex == 0 && item.status != 'Diproses') {
+                        return const SizedBox.shrink();
+                      }
+                      if (selectedTabIndex == 1 && item.status == 'Diproses') {
+                        return const SizedBox.shrink();
+                      }
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 10.0),
+                        child: _buildPengajuanCard(item),
+                      );
+                    },
+                  ),
+                );
+              },
             ),
           ),
         ],
@@ -186,14 +193,13 @@ class _WargaPengajuanPageState extends State<WargaPengajuanPage> {
     );
   }
 
-  Widget _buildPengajuanCard(Map<String, String> item) {
+  Widget _buildPengajuanCard(Request item) {
     return GestureDetector(
       onTap: () {
         context.push(
           '/wg/pengajuan/detail',
           extra: {
-            'requestName': item['requestName'],
-            'status': item['status'],
+            'id': item.id,
           },
         );
       },
@@ -217,7 +223,7 @@ class _WargaPengajuanPageState extends State<WargaPengajuanPage> {
             ),
           ),
           title: Text(
-            item['requestName'] ?? '',
+            item.serviceName ?? '-',
             style: GoogleFonts.poppins(
               fontSize: 14,
               fontWeight: FontWeight.w600,
@@ -227,10 +233,10 @@ class _WargaPengajuanPageState extends State<WargaPengajuanPage> {
           subtitle: Padding(
             padding: const EdgeInsets.only(top: 4.0),
             child: Text(
-              item['status'] ?? '',
+              item.status,
               style: GoogleFonts.poppins(
                 fontSize: 12,
-                color: _statusColor(item['status']),
+                color: _statusColor(item.status),
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -246,10 +252,10 @@ class _WargaPengajuanPageState extends State<WargaPengajuanPage> {
         return Colors.green[700]!;
       case 'ditolak':
         return Colors.red[700]!;
-      case 'sedang diproses':
+      case 'diproses':
         return const Color(0xFF245BCA);
-      case 'menunggu persetujuan':
-        return Colors.orange[700]!;
+      case 'dibatalkan':
+        return Colors.red[700]!;
       default:
         return Colors.grey[700]!;
     }

@@ -1,16 +1,67 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
+import '../../../../../core/controllers/request_controller.dart';
+import '../../../../../core/models/request.dart';
 
-class WargaPengajuanDetailPage extends StatelessWidget {
+class WargaPengajuanDetailPage extends StatefulWidget {
   final Map<String, dynamic> data;
-
   const WargaPengajuanDetailPage({super.key, required this.data});
 
   @override
+  State<WargaPengajuanDetailPage> createState() => _WargaPengajuanDetailPageState();
+}
+
+class _WargaPengajuanDetailPageState extends State<WargaPengajuanDetailPage> {
+  final _controller = RequestController();
+  Request? _request;
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRequest();
+  }
+
+  Future<void> _loadRequest() async {
+    final id = widget.data['id'];
+    if (id != null) {
+      final req = await _controller.getRequestById(id);
+      setState(() {
+        _request = req;
+        _loading = false;
+      });
+    } else {
+      setState(() => _loading = false);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final requestName = data['requestName'] ?? '-';
-    final status = data['status'] ?? '-';
+    if (_loading) {
+      return const Scaffold(
+        backgroundColor: Color(0xFFF2F6FF),
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    final req = _request;
+    if (req == null) {
+      return const Scaffold(
+        backgroundColor: Color(0xFFF2F6FF),
+        body: Center(child: Text("Data pengajuan tidak ditemukan")),
+      );
+    }
+
+    final requestName = req.serviceName ?? '-';
+    final status = req.status ?? '-';
+    final tanggalPengajuan = req.createdAt != null
+        ? DateFormat('dd MMMM yyyy', 'id_ID').format(req.createdAt!)
+        : '-';
+    final tanggalVerifikasi = req.verifiedAt != null
+        ? DateFormat('dd MMMM yyyy', 'id_ID').format(req.verifiedAt!)
+        : '-';
 
     return Scaffold(
       backgroundColor: const Color(0xFFF2F6FF),
@@ -31,13 +82,11 @@ class WargaPengajuanDetailPage extends StatelessWidget {
               ),
             ),
           ),
-
           SafeArea(
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  const SizedBox(height: 80), 
-
+                  const SizedBox(height: 80),
                   Container(
                     margin: const EdgeInsets.symmetric(horizontal: 20),
                     padding: const EdgeInsets.all(20),
@@ -67,8 +116,8 @@ class WargaPengajuanDetailPage extends StatelessWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            _buildInfoItem("Tanggal Pengajuan", "06 November 2025"),
-                            _buildInfoItem("Tanggal Verifikasi", "10 November 2025"),
+                            _buildInfoItem("Tanggal Pengajuan", tanggalPengajuan),
+                            _buildInfoItem("Tanggal Verifikasi", tanggalVerifikasi),
                           ],
                         ),
                         const SizedBox(height: 12),
@@ -101,145 +150,162 @@ class WargaPengajuanDetailPage extends StatelessWidget {
                           ],
                         ),
                         const SizedBox(height: 24),
-
                         Center(
                           child: Builder(
                             builder: (context) {
                               final lowerStatus = status.toLowerCase();
 
                               if (lowerStatus == 'disetujui' || lowerStatus == 'selesai') {
-                                return ElevatedButton.icon(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFF245BCA),
-                                    padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 28),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(14),
-                                    ),
-                                    elevation: 3,
-                                  ),
-                                  onPressed: () {
+                                return _buildButton(
+                                  color: const Color(0xFF245BCA),
+                                  icon: Icons.download_rounded,
+                                  label: "Unduh Pengajuan",
+                                  onPressed: () async {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
                                         content: Text(
                                           'Sedang mengunduh...',
-                                          style: GoogleFonts.poppins(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.w500,
-                                          ),
+                                          style: GoogleFonts.poppins(color: Colors.white),
                                         ),
                                         backgroundColor: const Color(0xFF245BCA),
-                                        duration: const Duration(seconds: 2),
                                       ),
                                     );
+                                    await _controller.downloadVerificationFile(req.fileUrl ?? '');
                                   },
-                                  icon: const Icon(Icons.download_rounded,
-                                      color: Colors.white, size: 20),
-                                  label: Text(
-                                    "Unduh Pengajuan",
-                                    style: GoogleFonts.poppins(
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.white,
-                                      fontSize: 13,
-                                      letterSpacing: 0.3,
-                                    ),
-                                  ),
                                 );
-                              }
-
-                              else if (lowerStatus == 'ditolak') {
-                                return ElevatedButton.icon(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.red[700],
-                                    padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 28),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(14),
-                                    ),
-                                    elevation: 3,
-                                  ),
+                              } else if (lowerStatus == 'ditolak' || lowerStatus == 'dibatalkan') {
+                                return _buildButton(
+                                  color: Colors.red[700]!,
+                                  icon: Icons.info_outline_rounded,
+                                  label: "Lihat Catatan",
                                   onPressed: () {
                                     showDialog(
                                       context: context,
                                       builder: (context) => AlertDialog(
                                         shape: RoundedRectangleBorder(
                                             borderRadius: BorderRadius.circular(20)),
-                                        title: Text(
-                                          'Catatan',
-                                          style: GoogleFonts.poppins(
-                                            fontWeight: FontWeight.w600,
-                                            color: Colors.red[700],
-                                          ),
-                                        ),
+                                        title: Text('Catatan',
+                                            style:
+                                                GoogleFonts.poppins(fontSize: 18, color: Colors.red[700])),
                                         content: Text(
-                                          data['alasan'] ??
-                                              'Pengajuan ditolak karena data tidak lengkap atau tidak valid.',
+                                          (req.notes ?? '').isNotEmpty
+                                              ? req.notes!
+                                              : 'Tidak ada catatan tambahan.',
                                           style: GoogleFonts.poppins(fontSize: 13),
                                         ),
                                         actions: [
                                           TextButton(
-                                            child: Text(
-                                              'Tutup',
-                                              style: GoogleFonts.poppins(
-                                                color: Colors.red[700],
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                            ),
-                                            onPressed: () => Navigator.pop(context),
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                            },
+                                            child: Text('Tutup',
+                                                style: GoogleFonts.poppins(
+                                                    color: Colors.red[700])),
                                           ),
                                         ],
                                       ),
                                     );
                                   },
-                                  icon: const Icon(Icons.info_outline_rounded,
-                                      color: Colors.white, size: 20),
-                                  label: Text(
-                                    "Lihat Catatan",
-                                    style: GoogleFonts.poppins(
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.white,
-                                      fontSize: 13,
-                                      letterSpacing: 0.3,
-                                    ),
-                                  ),
                                 );
-                              }
+                              } else if (lowerStatus == 'diproses') {
+                                return _buildButton(
+                                  color: Colors.red[700]!,
+                                  icon: Icons.cancel_outlined,
+                                  label: "Batalkan Pengajuan",
+                                  onPressed: () async {
+                                    final reasonController = TextEditingController();
+                                    String? errorText;
 
-                              else {
-                                return ElevatedButton.icon(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.orange[700],
-                                    padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 28),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(14),
-                                    ),
-                                    elevation: 3,
-                                  ),
-                                  onPressed: () {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                          'Pengajuan dibatalkan.',
-                                          style: GoogleFonts.poppins(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.w500,
+                                    await showDialog(
+                                      context: context,
+                                      barrierDismissible: false,
+                                      builder: (context) {
+                                        return StatefulBuilder(
+                                          builder: (context, setState) => AlertDialog(
+                                            shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(20)),
+                                            title: Text('Batalkan Pengajuan',
+                                                style: GoogleFonts.poppins(
+                                                    fontWeight: FontWeight.w600)),
+                                            content: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Text(
+                                                  'Tuliskan alasan pembatalan pengajuan:',
+                                                  style: GoogleFonts.poppins(fontSize: 13),
+                                                ),
+                                                const SizedBox(height: 12),
+                                                TextField(
+                                                  controller: reasonController,
+                                                  decoration: InputDecoration(
+                                                    hintText: 'Masukkan alasan pembatalan...',
+                                                    hintStyle: GoogleFonts.poppins(
+                                                        fontSize: 13, color: Colors.grey),
+                                                    errorText: errorText,
+                                                    border: OutlineInputBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(10),
+                                                    ),
+                                                  ),
+                                                  maxLines: 3,
+                                                ),
+                                              ],
+                                            ),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () =>
+                                                    Navigator.of(context).pop(),
+                                                child: Text('Tutup',
+                                                    style: GoogleFonts.poppins(
+                                                        color: Colors.grey[700])),
+                                              ),
+                                              ElevatedButton(
+                                                style: ElevatedButton.styleFrom(
+                                                    backgroundColor:
+                                                        Colors.red[700]),
+                                                onPressed: () async {
+                                                  if (reasonController.text
+                                                      .trim()
+                                                      .isEmpty) {
+                                                    setState(() {
+                                                      errorText =
+                                                          'Alasan pembatalan wajib diisi';
+                                                    });
+                                                    return;
+                                                  }
+
+                                                  await _controller.cancelRequest(
+                                                    id: req.id,
+                                                    reason: reasonController.text.trim(),
+                                                  );
+                                                  if (mounted) {
+                                                    Navigator.of(context).pop();
+                                                    ScaffoldMessenger.of(context)
+                                                        .showSnackBar(
+                                                      SnackBar(
+                                                        content: Text(
+                                                          'Pengajuan berhasil dibatalkan',
+                                                          style: GoogleFonts.poppins(
+                                                              color: Colors.white),
+                                                        ),
+                                                      ),
+                                                    );
+                                                    context.go('/wg/pengajuan');
+                                                  }
+                                                },
+                                                child: Text('Batalkan Pengajuan',
+                                                    style: GoogleFonts.poppins(
+                                                        color: Colors.white)),
+                                              ),
+                                            ],
                                           ),
-                                        ),
-                                        backgroundColor: Colors.orange[700],
-                                        duration: const Duration(seconds: 2),
-                                      ),
+                                        );
+                                      },
                                     );
                                   },
-                                  icon: const Icon(Icons.cancel_outlined,
-                                      color: Colors.white, size: 20),
-                                  label: Text(
-                                    "Batalkan Pengajuan",
-                                    style: GoogleFonts.poppins(
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.white,
-                                      fontSize: 13,
-                                      letterSpacing: 0.3,
-                                    ),
-                                  ),
                                 );
+                              } else {
+                                return const SizedBox();
                               }
                             },
                           ),
@@ -247,54 +313,24 @@ class WargaPengajuanDetailPage extends StatelessWidget {
                       ],
                     ),
                   ),
-
-                  const SizedBox(height: 24),
-
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Row(
-                      children: [
-                        const Expanded(
-                          child: Divider(
-                            color: Colors.grey,
-                            thickness: 1,
-                            endIndent: 10,
-                          ),
-                        ),
+                  const SizedBox(height: 18),
                         Text(
-                          "Detail Status",
+                          "---------- DETAIL STATUS ----------",
+                          textAlign: TextAlign.center,
                           style: GoogleFonts.poppins(
-                            fontSize: 13,
+                            color: Colors.black87,
                             fontWeight: FontWeight.w600,
-                            color: const Color(0xFF00194A),
                           ),
                         ),
-                        const Expanded(
-                          child: Divider(
-                            color: Colors.grey,
-                            thickness: 1,
-                            indent: 10,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  _buildTimelineItem(
-                      "08 November 2025 13:30", "Pengajuan dibuat", true),
-                  _buildTimelineItem(
-                      "09 November 2025 10:00", "Verifikasi RT", true),
-                  _buildTimelineItem(
-                      "10 November 2025 10:00", "Pengajuan selesai", false),
-
+                        const SizedBox(height: 12),
+                  _buildTimelineItem(tanggalPengajuan, "Pengajuan dibuat", true),
+                  _buildTimelineItem(tanggalVerifikasi, "Verifikasi RT", true),
+                  _buildTimelineItem("-", "Pengajuan selesai", false),
                   const SizedBox(height: 60),
                 ],
               ),
             ),
           ),
-
           Positioned(
             top: 20,
             left: 0,
@@ -306,14 +342,9 @@ class WargaPengajuanDetailPage extends StatelessWidget {
                   icon: const Icon(Icons.arrow_back, color: Colors.white),
                   onPressed: () => context.go('/wg/pengajuan'),
                 ),
-                Text(
-                  'Detail Riwayat',
-                  style: GoogleFonts.poppins(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 18,
-                  ),
-                ),
+                Text('Detail Riwayat',
+                    style: GoogleFonts.poppins(
+                        color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600)),
                 const SizedBox(width: 48),
               ],
             ),
@@ -323,86 +354,77 @@ class WargaPengajuanDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoItem(String title, String value) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: GoogleFonts.poppins(
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-            color: Colors.grey[700],
-          ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          value,
-          style: GoogleFonts.poppins(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: const Color(0xFF00194A),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTimelineItem(String date, String title, bool isActive) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 4),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Column(
-            children: [
-              Container(
-                width: 10,
-                height: 10,
-                decoration: BoxDecoration(
-                  color: isActive ? const Color(0xFF245BCA) : Colors.grey[400],
-                  shape: BoxShape.circle,
-                ),
-              ),
-              Container(
-                width: 2,
-                height: 40,
-                color: Colors.grey[300],
-              ),
-            ],
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    date,
-                    style: GoogleFonts.poppins(
-                      fontSize: 11,
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    title,
-                    style: GoogleFonts.poppins(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color:
-                          isActive ? const Color(0xFF00194A) : Colors.grey[600],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
+  Widget _buildButton({
+    required Color color,
+    required IconData icon,
+    required String label,
+    required VoidCallback onPressed,
+  }) {
+    return ElevatedButton.icon(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: color,
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 28),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      ),
+      onPressed: onPressed,
+      icon: Icon(icon, color: Colors.white, size: 20),
+      label: Text(
+        label,
+        style: GoogleFonts.poppins(
+            color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13),
       ),
     );
   }
+
+  Widget _buildInfoItem(String title, String value) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(title,
+          style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[700])),
+      Text(value,
+          style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600)),
+    ],
+  );
+
+  Widget _buildTimelineItem(String date, String title, bool isActive) => Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 4),
+    child: Row(
+      children: [
+        Column(
+          children: [
+            Container(
+                width: 10,
+                height: 10,
+                decoration: BoxDecoration(
+                    color: isActive
+                        ? const Color(0xFF245BCA)
+                        : Colors.grey[400],
+                    shape: BoxShape.circle)),
+            Container(width: 2, height: 40, color: Colors.grey[300]),
+          ],
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(date,
+                  style: GoogleFonts.poppins(fontSize: 11, color: Colors.grey[600])),
+              Text(title,
+                  style: GoogleFonts.poppins(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: isActive
+                          ? const Color(0xFF00194A)
+                          : Colors.grey[600]
+                  )
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
 
   Color _statusColor(String status) {
     switch (status.toLowerCase()) {
@@ -411,10 +433,10 @@ class WargaPengajuanDetailPage extends StatelessWidget {
         return Colors.green[700]!;
       case 'ditolak':
         return Colors.red[700]!;
-      case 'sedang diproses':
+      case 'diproses':
         return const Color(0xFF245BCA);
-      case 'menunggu persetujuan':
-        return Colors.orange[700]!;
+      case 'dibatalkan':
+        return Colors.red[700]!;
       default:
         return Colors.grey[700]!;
     }
