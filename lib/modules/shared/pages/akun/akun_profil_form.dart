@@ -14,16 +14,13 @@ class AkunProfilFormPage extends StatefulWidget {
 
 class _AkunProfilFormPageState extends State<AkunProfilFormPage> {
   final _formKey = GlobalKey<FormState>();
-  final controller = UserController();
-  
+  final userController = UserController();
+
   late TextEditingController usernameController;
   late TextEditingController emailController;
   late TextEditingController passwordController;
   late TextEditingController birthPlaceController;
   late TextEditingController birthDateController;
-  late TextEditingController rtController;
-  late TextEditingController rwController;
-  late TextEditingController dusunController;
   late TextEditingController phoneController;
   late TextEditingController occupationController;
 
@@ -32,8 +29,15 @@ class _AkunProfilFormPageState extends State<AkunProfilFormPage> {
   String? selectedMaritalStatus;
   String? selectedRole;
 
+  String? selectedHamletId;
+  String? selectedRt;
+  String? selectedRw;
+
   bool isLoading = true;
   String? userId;
+  List<Map<String, dynamic>> hamletList = [];
+  List<Map<String, dynamic>> rtList = [];
+  List<Map<String, dynamic>> rwList = [];
 
   @override
   void initState() {
@@ -43,15 +47,18 @@ class _AkunProfilFormPageState extends State<AkunProfilFormPage> {
     passwordController = TextEditingController();
     birthPlaceController = TextEditingController();
     birthDateController = TextEditingController();
-    rtController = TextEditingController();
-    rwController = TextEditingController();
-    dusunController = TextEditingController();
     phoneController = TextEditingController();
     occupationController = TextEditingController();
 
     _loadUser();
+    _loadhamletList();
   }
-  
+
+  Future<void> _loadhamletList() async {
+    hamletList = await userController.getHamletList();
+    setState(() {});
+  }
+
   Future<void> _loadUser() async {
     final currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser == null) {
@@ -60,7 +67,7 @@ class _AkunProfilFormPageState extends State<AkunProfilFormPage> {
     }
     userId = currentUser.uid;
 
-    final user = await controller.getUserById(userId!);
+    final user = await userController.getUserById(userId!);
     if (user != null) {
       usernameController.text = user.username;
       emailController.text = user.email;
@@ -70,30 +77,38 @@ class _AkunProfilFormPageState extends State<AkunProfilFormPage> {
         final parts = user.birthPlaceDate.split(',');
         birthPlaceController.text = parts[0].trim();
         birthDateController.text = parts[1].trim();
-      } else {
-        birthPlaceController.text = user.birthPlaceDate;
-        birthDateController.text = '';
       }
 
       selectedReligion = user.religion.isNotEmpty ? user.religion : null;
       selectedNationality = user.nationality.isNotEmpty ? user.nationality : null;
       selectedMaritalStatus = user.maritalStatus.isNotEmpty ? user.maritalStatus : null;
       selectedRole = user.role.isNotEmpty ? user.role : null;
-
       occupationController.text = user.occupation;
-
-      if (user.address.isNotEmpty && user.address.contains(',')) {
-        final parts = user.address.split(',');
-        rtController.text = parts.length > 0 ? parts[0].trim() : '';
-        rwController.text = parts.length > 1 ? parts[1].trim() : '';
-        dusunController.text = parts.length > 2 ? parts[2].trim() : '';
-      } else {
-        rtController.text = user.rt;
-        rwController.text = '';
-        dusunController.text = '';
-      }
-
       phoneController.text = user.phone;
+
+      if (user.areaId.isNotEmpty) {
+        final areaList = await userController.getHamletList();
+        final areaDoc = areaList.firstWhere(
+          (a) => a['id'] == user.areaId,
+          orElse: () => {},
+        );
+
+        if (areaDoc.isNotEmpty) {
+          selectedHamletId = areaDoc['id'];
+          selectedRt = areaDoc['rt'];
+          selectedRw = areaDoc['rw'];
+        }
+
+        if (selectedHamletId != null) {
+          final hamletName = hamletList.firstWhere((e) => e['id'] == selectedHamletId)['hamlet'];
+          rwList = await userController.getRwList(hamletName);
+        }
+
+        if (selectedRw != null && selectedHamletId != null) {
+          final hamletName = hamletList.firstWhere((e) => e['id'] == selectedHamletId)['hamlet'];
+          rtList = await userController.getRtList(hamletName, selectedRw!);
+        }
+      }
     }
     setState(() => isLoading = false);
   }
@@ -105,9 +120,6 @@ class _AkunProfilFormPageState extends State<AkunProfilFormPage> {
     passwordController.dispose();
     birthPlaceController.dispose();
     birthDateController.dispose();
-    rtController.dispose();
-    rwController.dispose();
-    dusunController.dispose();
     phoneController.dispose();
     occupationController.dispose();
     super.dispose();
@@ -117,10 +129,16 @@ class _AkunProfilFormPageState extends State<AkunProfilFormPage> {
     if (!_formKey.currentState!.validate()) return;
 
     try {
-      String address =
-          "${rtController.text.trim()}, ${rwController.text.trim()}, ${dusunController.text.trim()}";
+      String areaId = '';
+      if (selectedHamletId != null && selectedRt != null && selectedRw != null) {
+        final match = rwList.firstWhere(
+          (e) => e['rw'] == selectedRw && e['rt'] == selectedRt,
+          orElse: () => {},
+        );
+        areaId = match['id'] ?? '';
+      }
 
-      await controller.updateUser(
+      await userController.updateUser(
         id: userId!,
         username: usernameController.text,
         email: emailController.text,
@@ -131,8 +149,7 @@ class _AkunProfilFormPageState extends State<AkunProfilFormPage> {
         nationality: selectedNationality!,
         occupation: occupationController.text,
         maritalStatus: selectedMaritalStatus!,
-        rt: rtController.text.trim(),
-        address: address,
+        areaId: areaId,
         phone: phoneController.text,
         role: selectedRole!,
       );
@@ -141,7 +158,7 @@ class _AkunProfilFormPageState extends State<AkunProfilFormPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Profil berhasil diperbarui')),
       );
-      context.pop();
+      context.pop(true);
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context)
@@ -164,11 +181,8 @@ class _AkunProfilFormPageState extends State<AkunProfilFormPage> {
         elevation: 1,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Color(0xFF245BCA)),
-          onPressed: () { 
-            context.pop();
-          },
+          onPressed: () => context.pop(),
         ),
-
         title: Text(
           "Ubah Profil",
           style: GoogleFonts.poppins(
@@ -254,11 +268,11 @@ class _AkunProfilFormPageState extends State<AkunProfilFormPage> {
               const SizedBox(height: 16),
               Row(
                 children: [
-                  SizedBox(width: 60, child: _buildTextField('RT', rtController)),
+                  Expanded(flex: 2, child: _buildHamletDropdown()),
                   const SizedBox(width: 8),
-                  SizedBox(width: 60, child: _buildTextField('RW', rwController)),
+                  Expanded(flex: 1, child: _buildRwDropdown()),
                   const SizedBox(width: 8),
-                  Expanded(child: _buildTextField('Dusun', dusunController)),
+                  Expanded(flex: 1, child: _buildRtDropdown()),
                 ],
               ),
               const SizedBox(height: 24),
@@ -278,7 +292,7 @@ class _AkunProfilFormPageState extends State<AkunProfilFormPage> {
                     color: Colors.white,
                   ),
                 ),
-              )
+              ),
             ],
           ),
         ),
@@ -312,6 +326,97 @@ class _AkunProfilFormPageState extends State<AkunProfilFormPage> {
         border: const OutlineInputBorder(),
       ),
       validator: (v) => v == null ? '$label harus dipilih' : null,
+    );
+  }
+
+  Widget _buildHamletDropdown() {
+    final hamletNames = hamletList.map((e) => e['hamlet'] ?? '-').toSet().toList();
+
+    return DropdownButtonFormField<String>(
+      value: selectedHamletId != null
+          ? hamletList.firstWhere((e) => e['id'] == selectedHamletId)['hamlet']
+          : null,
+      items: hamletNames
+          .map((hamlet) => DropdownMenuItem<String>(
+                value: hamlet,
+                child: Text(hamlet),
+              ))
+          .toList(),
+      onChanged: (v) async {
+        final hamletName = v;
+        setState(() {
+          selectedHamletId =
+              hamletList.firstWhere((e) => e['hamlet'] == hamletName)['id'];
+          selectedRw = null;
+          selectedRt = null;
+          rwList = [];
+          rtList = [];
+        });
+        if (hamletName != null) {
+          rwList = await userController.getRwList(hamletName);
+          setState(() {});
+        }
+      },
+      decoration: InputDecoration(
+        labelText: 'Dusun',
+        border: const OutlineInputBorder(),
+      ),
+      validator: (v) => v == null ? 'Dusun harus dipilih' : null,
+    );
+  }
+
+  Widget _buildRwDropdown() {
+    final rwNames = rwList.map((e) => e['rw'] ?? '-').toSet().toList();
+
+    return DropdownButtonFormField<String>(
+      value: selectedRw,
+      items: rwNames
+          .map((rw) => DropdownMenuItem<String>(
+                value: rw,
+                child: Text(rw),
+              ))
+          .toList(),
+      onChanged: selectedHamletId == null ? null : (v) async {
+        setState(() {
+          selectedRw = v;
+          selectedRt = null;
+          rtList = [];
+        });
+        if (v != null && selectedHamletId != null) {
+          final hamletName = hamletList.firstWhere((e) => e['id'] == selectedHamletId)['hamlet'];
+          rtList = await userController.getRtList(hamletName, v);
+          setState(() {});
+        }
+      },
+      decoration: InputDecoration(
+        labelText: 'RW',
+        border: const OutlineInputBorder(),
+      ),
+      validator: (v) => v == null ? 'RW harus dipilih' : null,
+    );
+  }
+
+  Widget _buildRtDropdown() {
+    final rtNames = rtList.map((e) => e['rt'] ?? '-').toSet().toList();
+
+    return DropdownButtonFormField<String>(
+      value: selectedRt,
+      items: rtNames
+          .map((rt) => DropdownMenuItem<String>(
+                value: rt,
+                child: Text(rt),
+              ))
+          .toList(),
+      onChanged: rtList.isEmpty ? null : (v) {
+        setState(() {
+          selectedRt = v;
+        });
+      },
+      decoration: InputDecoration(
+        labelText: 'RT',
+        border: const OutlineInputBorder(),
+      ),
+      validator: (v) => v == null ? 'RT harus dipilih' : null,
     );
   }
 }

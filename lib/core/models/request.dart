@@ -9,7 +9,7 @@ class Request {
   final String? notes;
   final String? fileUrl;
   final DateTime createdAt;
-  final String? serviceName; // untuk tampilan, tidak disimpan di DB
+  final String? serviceName;
 
   Request({
     required this.id,

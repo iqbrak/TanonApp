@@ -8,8 +8,7 @@ class User {
   String nationality;
   String occupation;
   String maritalStatus;
-  String rt;
-  String address;
+  String areaId;
   String phone;
   String role;
 
@@ -23,8 +22,7 @@ class User {
     required this.nationality,
     required this.occupation,
     required this.maritalStatus,
-    required this.rt,
-    required this.address,
+    required this.areaId,
     required this.phone,
     required this.role,
   });
@@ -40,8 +38,7 @@ class User {
       nationality: map['nationality'] ?? '',
       occupation: map['occupation'] ?? '',
       maritalStatus: map['maritalStatus'] ?? '',
-      rt: map['rt'] ?? '',
-      address: map['address'] ?? '',
+      areaId: map['areaId'] ?? '',
       phone: map['phone'] ?? '',
       role: map['role'] ?? '',
     );
@@ -57,8 +54,7 @@ class User {
       'nationality': nationality,
       'occupation': occupation,
       'maritalStatus': maritalStatus,
-      'rt': rt,
-      'address': address,
+      'areaId': areaId,
       'phone': phone,
       'role': role,
     };

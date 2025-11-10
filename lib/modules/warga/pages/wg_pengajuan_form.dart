@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../../core/controllers/request_controller.dart';
+import '../../../../../core/controllers/user_controller.dart';
 
 class WargaPengajuanFormPage extends StatefulWidget {
   const WargaPengajuanFormPage({super.key});
@@ -14,14 +15,16 @@ class WargaPengajuanFormPage extends StatefulWidget {
 
 class _WargaPengajuanFormPageState extends State<WargaPengajuanFormPage> {
   final _formKey = GlobalKey<FormState>();
-
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final RequestController _requestController = RequestController();
+  final UserController _userController = UserController();
 
   String? selectedServiceId;
   List<String> selectedRequirements = [];
   List<Map<String, dynamic>> services = [];
+
+  String areaId = '';
 
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController birthPlaceDateController = TextEditingController();
@@ -29,7 +32,6 @@ class _WargaPengajuanFormPageState extends State<WargaPengajuanFormPage> {
   final TextEditingController nationalityController = TextEditingController();
   final TextEditingController occupationController = TextEditingController();
   final TextEditingController maritalStatusController = TextEditingController();
-  final TextEditingController rtController = TextEditingController();
   final TextEditingController addressController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
 
@@ -61,6 +63,14 @@ class _WargaPengajuanFormPageState extends State<WargaPengajuanFormPage> {
     if (!doc.exists) return;
 
     final data = doc.data()!;
+    areaId = data['areaId'] ?? '';
+
+    // Ambil alamat lengkap dari areaId
+    String fullAddress = '-';
+    if (areaId.isNotEmpty) {
+      fullAddress = await _userController.getFullAddress(areaId);
+    }
+
     setState(() {
       usernameController.text = data['username'] ?? '';
       birthPlaceDateController.text = data['birthPlaceDate'] ?? '';
@@ -68,8 +78,7 @@ class _WargaPengajuanFormPageState extends State<WargaPengajuanFormPage> {
       nationalityController.text = data['nationality'] ?? '';
       occupationController.text = data['occupation'] ?? '';
       maritalStatusController.text = data['maritalStatus'] ?? '';
-      rtController.text = data['rt'] ?? '';
-      addressController.text = data['address'] ?? '';
+      addressController.text = fullAddress;
       phoneController.text = data['phone'] ?? '';
     });
   }
@@ -85,9 +94,6 @@ class _WargaPengajuanFormPageState extends State<WargaPengajuanFormPage> {
 
     final user = _auth.currentUser;
     if (user == null) return;
-
-    final userDoc = await _firestore.collection('users').doc(user.uid).get();
-    final areaId = userDoc.data()?['areaId'] ?? '';
 
     try {
       await _requestController.addRequest(
@@ -114,7 +120,6 @@ class _WargaPengajuanFormPageState extends State<WargaPengajuanFormPage> {
     nationalityController.dispose();
     occupationController.dispose();
     maritalStatusController.dispose();
-    rtController.dispose();
     addressController.dispose();
     phoneController.dispose();
     super.dispose();
@@ -153,7 +158,6 @@ class _WargaPengajuanFormPageState extends State<WargaPengajuanFormPage> {
                     color: const Color(0xFF00194A)),
               ),
               const SizedBox(height: 8),
-
               DropdownButtonFormField<String>(
                 value: selectedServiceId,
                 decoration: const InputDecoration(
@@ -175,9 +179,7 @@ class _WargaPengajuanFormPageState extends State<WargaPengajuanFormPage> {
                   });
                 },
               ),
-
               const SizedBox(height: 12),
-
               if (selectedRequirements.isNotEmpty) ...[
                 Container(
                   decoration: BoxDecoration(
@@ -214,7 +216,6 @@ class _WargaPengajuanFormPageState extends State<WargaPengajuanFormPage> {
                 ),
                 const SizedBox(height: 20),
               ],
-
               Text(
                 "DATA PRIBADI PENGAJU",
                 style: GoogleFonts.poppins(
@@ -223,7 +224,6 @@ class _WargaPengajuanFormPageState extends State<WargaPengajuanFormPage> {
                     color: const Color(0xFF00194A)),
               ),
               const SizedBox(height: 8),
-
               _buildTextField(usernameController, 'Nama Lengkap'),
               const SizedBox(height: 10),
               _buildTextField(birthPlaceDateController, 'Tempat / Tanggal Lahir'),
@@ -236,13 +236,10 @@ class _WargaPengajuanFormPageState extends State<WargaPengajuanFormPage> {
               const SizedBox(height: 10),
               _buildTextField(maritalStatusController, 'Status Perkawinan'),
               const SizedBox(height: 10),
-              _buildTextField(rtController, 'RT'),
-              const SizedBox(height: 10),
-              _buildTextField(addressController, 'Alamat Lengkap'),
+              _buildTextField(addressController, 'Alamat'),
               const SizedBox(height: 10),
               _buildTextField(phoneController, 'Nomor Telepon'),
               const SizedBox(height: 24),
-
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF245BCA),

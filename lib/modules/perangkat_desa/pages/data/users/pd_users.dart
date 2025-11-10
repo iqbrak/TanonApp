@@ -200,8 +200,18 @@ class _DesaDataUsersPageState extends State<DesaDataUsersPage> {
           Text("Alamat:",
               style: GoogleFonts.poppins(
                   fontSize: 12, fontWeight: FontWeight.w600, color: const Color(0xFF00194A))),
-          Text(formatAddress(user.address), style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[700])),
-          const SizedBox(height: 4),
+          FutureBuilder<String>(
+            future: controller.getFullAddress(user.areaId),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Text('-', style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[700]));
+              }
+              if (snapshot.hasError) {
+                return Text('-', style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[700]));
+              }
+              return Text(snapshot.data ?? '-', style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[700]));
+            },
+          ),
 
           Text("No. Telepon:",
               style: GoogleFonts.poppins(

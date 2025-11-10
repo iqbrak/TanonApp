@@ -55,7 +55,7 @@ class _WargaPengajuanDetailPageState extends State<WargaPengajuanDetailPage> {
     }
 
     final requestName = req.serviceName ?? '-';
-    final status = req.status ?? '-';
+    final status = req.status;
     final tanggalPengajuan = req.createdAt != null
         ? DateFormat('dd MMMM yyyy', 'id_ID').format(req.createdAt!)
         : '-';

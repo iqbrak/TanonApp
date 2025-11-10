@@ -49,8 +49,7 @@ class UserController {
       nationality: '',
       occupation: '',
       maritalStatus: '',
-      rt: '',
-      address: '',
+      areaId: '',
       phone: '',
     );
 
@@ -68,8 +67,7 @@ class UserController {
     required String nationality,
     required String occupation,
     required String maritalStatus,
-    required String rt,
-    required String address,
+    required String areaId,
     required String phone,
     required String role,
   }) async {
@@ -83,8 +81,7 @@ class UserController {
       nationality: nationality.trim(),
       occupation: occupation.trim(),
       maritalStatus: maritalStatus.trim(),
-      rt: rt.trim(),
-      address: address.trim(),
+      areaId: areaId.trim(),
       phone: phone.trim(),
       role: role.trim(),
     );
@@ -110,8 +107,7 @@ class UserController {
       nationality: '',
       occupation: '',
       maritalStatus: '',
-      rt: '',
-      address: '',
+      areaId: '',
       phone: '',
     );
 
@@ -193,5 +189,54 @@ class UserController {
       debugPrint('Error mengambil username: $e');
       return 'Error';
     }
+  }
+
+  Future<String> getFullAddress(String areaId) async {
+    try {
+      final doc = await _firestore.collection('areas').doc(areaId).get();
+      if (!doc.exists) return '-';
+      final data = doc.data()!;
+      final rt = data['rt'] ?? '-';
+      final rw = data['rw'] ?? '-';
+      final hamlet = data['hamlet'] ?? '-';
+      return 'RT $rt/RW $rw Dusun $hamlet';
+    } catch (e) {
+      debugPrint('Error getFullAddress: $e');
+      return '-';
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getHamletList() async {
+    final snapshot = await _firestore.collection('areas').get();
+    return snapshot.docs.map((doc) {
+      final data = doc.data();
+      data['id'] = doc.id;
+      return data;
+    }).toList();
+  }
+
+  Future<List<Map<String, dynamic>>> getRwList(String hamletName) async {
+    final snapshot = await _firestore
+        .collection('areas')
+        .where('hamlet', isEqualTo: hamletName) // pakai nama hamlet
+        .get();
+    return snapshot.docs.map((doc) {
+      final data = doc.data();
+      data['id'] = doc.id;
+      return data;
+    }).toList();
+  }
+
+  Future<List<Map<String, dynamic>>> getRtList(String hamletName, String rw) async {
+    final snapshot = await _firestore
+        .collection('areas')
+        .where('hamlet', isEqualTo: hamletName)
+        .where('rw', isEqualTo: rw)
+        .get();
+    return snapshot.docs.map((doc) {
+      final data = doc.data();
+      data['id'] = doc.id;
+      return data;
+    }).toList();
   }
 }

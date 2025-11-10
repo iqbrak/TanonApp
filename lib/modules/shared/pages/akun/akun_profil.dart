@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/controllers/auth_controller.dart';
+import '../../../../core/controllers/user_controller.dart';
 
 class AkunProfilPage extends StatefulWidget {
   final String routePrefix;
@@ -53,15 +54,6 @@ class _AkunProfilPageState extends State<AkunProfilPage> {
     });
   }
 
-  String _formatAddress(String address) {
-    if (address.isEmpty || address == '-') return '-';
-    final parts = address.split(',').map((e) => e.trim()).toList();
-    String rt = parts.isNotEmpty ? parts[0] : '-';
-    String rw = parts.length > 1 ? parts[1] : '-';
-    String dusun = parts.length > 2 ? parts[2] : '-';
-    return 'RT $rt/ RW $rw, Dsn. $dusun';
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -105,16 +97,9 @@ class _AkunProfilPageState extends State<AkunProfilPage> {
                               Text(
                                 'Profil Saya',
                                 style: GoogleFonts.poppins(
-                                  color: Colors.white,
+                                  color: const Color(0xFF00194A),
                                   fontSize: 24,
                                   fontWeight: FontWeight.w600,
-                                  shadows: [
-                                    Shadow(
-                                      color: Colors.black.withOpacity(0.3),
-                                      offset: const Offset(0, 1),
-                                      blurRadius: 2,
-                                    ),
-                                  ],
                                 ),
                               ),
                             ],
@@ -178,7 +163,16 @@ class _AkunProfilPageState extends State<AkunProfilPage> {
                                 _infoRow('Kewarganegaraan', _userData?['nationality'] ?? '-'),
                                 _infoRow('Pekerjaan', _userData?['occupation'] ?? '-'),
                                 _infoRow('Status Perkawinan', _userData?['maritalStatus'] ?? '-'),
-                                _infoRow('Alamat', _formatAddress(_userData?['address'] ?? '-')),
+                                FutureBuilder<String>(
+                                  future: UserController().getFullAddress(_userData?['areaId'] ?? ''),
+                                  builder: (context, snapshot) {
+                                    String alamat = '-';
+                                    if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
+                                      alamat = snapshot.data!;
+                                    }
+                                    return _infoRow('Alamat', alamat);
+                                  },
+                                ),
                                 _infoRow('No. HP', _userData?['phone'] ?? '-'),
                               ],
                             ),
@@ -187,11 +181,14 @@ class _AkunProfilPageState extends State<AkunProfilPage> {
                           SizedBox(
                             width: double.infinity,
                             child: ElevatedButton.icon(
-                              onPressed: () {
-                                context.push(
+                              onPressed: () async {
+                                final result = await context.push(
                                   '/${widget.routePrefix}/akun/profil/form',
                                   extra: {'from': '/${widget.routePrefix}/akun/profil', 'prefix': widget.routePrefix},
                                 );
+                                if (result == true) {
+                                  _loadUserData();
+                                }
                               },
                               icon: const Icon(Icons.edit, color: Colors.white),
                               label: Text(
