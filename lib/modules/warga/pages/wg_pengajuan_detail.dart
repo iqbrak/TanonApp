@@ -56,9 +56,7 @@ class _WargaPengajuanDetailPageState extends State<WargaPengajuanDetailPage> {
 
     final requestName = req.serviceName ?? '-';
     final status = req.status;
-    final tanggalPengajuan = req.createdAt != null
-        ? DateFormat('dd MMMM yyyy', 'id_ID').format(req.createdAt!)
-        : '-';
+    final tanggalPengajuan = DateFormat('dd MMMM yyyy', 'id_ID').format(req.createdAt);
     final tanggalVerifikasi = req.verifiedAt != null
         ? DateFormat('dd MMMM yyyy', 'id_ID').format(req.verifiedAt!)
         : '-';
@@ -344,7 +342,7 @@ class _WargaPengajuanDetailPageState extends State<WargaPengajuanDetailPage> {
                 ),
                 Text('Detail Riwayat',
                     style: GoogleFonts.poppins(
-                        color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600)),
+                        color: const Color(0xFF00194A), fontSize: 18, fontWeight: FontWeight.w600)),
                 const SizedBox(width: 48),
               ],
             ),

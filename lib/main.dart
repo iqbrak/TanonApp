@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'router.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:firebase_database/firebase_database.dart';
 
@@ -22,6 +23,8 @@ void main() async {
     debug: true,
   );
 
+  await initializeDateFormatting('id_ID', null);
+
   runApp(const MyApp());
 }
 
@@ -32,7 +35,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
-      title: 'Perangkat Desa App',
+      title: 'E-Tanon App',
       theme: ThemeData(
         scaffoldBackgroundColor: const Color(0xFFF2F6FF),
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
