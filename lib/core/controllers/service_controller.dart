@@ -70,39 +70,6 @@ class ServiceController {
     await _firestore.collection(collectionName).doc(id).delete();
   }
 
-  Future<void> deleteServiceWithConfirmation(BuildContext context, String id) async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Konfirmasi Hapus'),
-        content: const Text('Yakin ingin menghapus data?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Batal'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFCA2424),
-            ),
-            child: const Text(
-              'Hapus',
-              style: TextStyle(color: Colors.white), 
-            ),
-          ),
-        ],
-      ),
-    );
-
-    if (confirm == true) {
-      await deleteService(id);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Keperluan berhasil dihapus')),
-      );
-    }
-  }
-
   Stream<List<Service>> getFilteredServicesStream(String keyword) {
     keyword = keyword.toLowerCase();
     return _firestore.collection(collectionName).snapshots().map((snapshot) {

@@ -153,7 +153,7 @@ class DesaBerandaPage extends StatelessWidget {
                   title: 'Pengajuan',
                   total: 12,
                   color: const Color(0xFFCEDDFF),
-                  route: '/data/requests',
+                  route: '/pd/data/requests',
                 ),
               ),
               const SizedBox(width: 10),
@@ -189,7 +189,7 @@ class DesaBerandaPage extends StatelessWidget {
     required String route,
   }) {
     return GestureDetector(
-      onTap: () => context.go(route),
+      onTap: () => context.push(route),
       child: Container(
         height: 80,
         padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -256,7 +256,7 @@ class DesaBerandaPage extends StatelessWidget {
                   ),
                 ),
                 GestureDetector(
-                  onTap: () => context.go('/pd/berita'),
+                  onTap: () => context.push('/pd/berita'),
                   child: Text(
                     'Lihat Semua',
                     style: GoogleFonts.poppins(
@@ -278,9 +278,9 @@ class DesaBerandaPage extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final item = berita[index];
                   return GestureDetector(
-                    onTap: () => context.go(
+                    onTap: () => context.push(
                       '/pd/berita/detail',
-                      extra: item.id,
+                      extra: {'newsId': item.id},
                     ),
                     child: Container(
                       width: 140,

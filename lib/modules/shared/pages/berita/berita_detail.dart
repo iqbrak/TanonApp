@@ -17,19 +17,11 @@ class _BeritaDetailPageState extends State<BeritaDetailPage> {
   News? news;
   final NewsController _newsController = NewsController();
   final AuthController _authController = AuthController();
-  late String _defaultBackRoute;
 
   @override
   void initState() {
     super.initState();
     _loadNews();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final extra = GoRouterState.of(context).extra as Map<String, dynamic>? ?? {};
-      setState(() {
-       _defaultBackRoute = extra['from'] ?? '/${_authController.getRoutePrefix()}/berita';
-      });
-    });
   }
 
   void _loadNews() async {
@@ -66,7 +58,7 @@ class _BeritaDetailPageState extends State<BeritaDetailPage> {
                 backgroundColor: Colors.white,
                 child: IconButton(
                   icon: const Icon(Icons.arrow_back, color: Color(0xFF245BCA)),
-                  onPressed: () { context.go(_defaultBackRoute); },
+                  onPressed: () { context.pop(); },
                 ),
               ),
             ),

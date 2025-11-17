@@ -106,7 +106,7 @@ class BeritaPage extends StatelessWidget {
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 10.0),
                         child: GestureDetector(
-                          onTap: () => context.go(
+                          onTap: () => context.push(
                             '/${_authController.currentUserRole == 'Warga' ? 'wg' : 'pd'}/berita/detail',
                             extra: {
                               'newsId': berita.id,

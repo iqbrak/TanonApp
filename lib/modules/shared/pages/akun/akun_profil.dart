@@ -19,7 +19,6 @@ class _AkunProfilPageState extends State<AkunProfilPage> {
   final _firestore = FirebaseFirestore.instance;
   final _authController = AuthController();
 
-  late String _defaultBackRoute;
   Map<String, dynamic>? _userData;
   bool _loading = true;
 
@@ -27,17 +26,6 @@ class _AkunProfilPageState extends State<AkunProfilPage> {
   void initState() {
     super.initState();
     _loadUserData();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final extra = GoRouterState.of(context).extra;
-    if (extra != null && extra is Map<String, dynamic> && extra.containsKey('from')) {
-      _defaultBackRoute = extra['from'] as String;
-    } else {
-      _defaultBackRoute = '/${_authController.getRoutePrefix()}/akun';
-    }
   }
 
   Future<void> _loadUserData() async {
@@ -88,9 +76,7 @@ class _AkunProfilPageState extends State<AkunProfilPage> {
                                   backgroundColor: Colors.white,
                                   child: IconButton(
                                     icon: const Icon(Icons.arrow_back, color: Color(0xFF245BCA)),
-                                    onPressed: () {
-                                      context.go(_defaultBackRoute);
-                                    },
+                                    onPressed: () { context.pop(); },
                                   ),
                                 ),
                               ),

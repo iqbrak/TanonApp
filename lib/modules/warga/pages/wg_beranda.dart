@@ -189,7 +189,7 @@ class WargaBerandaPage extends StatelessWidget {
     required String route,
   }) {
     return GestureDetector(
-      onTap: () => context.go(route),
+      onTap: () => context.push(route),
       child: Container(
         height: 80,
         padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -256,7 +256,7 @@ class WargaBerandaPage extends StatelessWidget {
                   ),
                 ),
                 GestureDetector(
-                  onTap: () => context.go('/wg/berita'),
+                  onTap: () => context.push('/wg/berita'),
                   child: Text(
                     'Lihat Semua',
                     style: GoogleFonts.poppins(
@@ -278,9 +278,9 @@ class WargaBerandaPage extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final item = berita[index];
                   return GestureDetector(
-                    onTap: () => context.go(
+                    onTap: () => context.push(
                       '/wg/berita/detail',
-                      extra: item.id,
+                      extra: {'newsId': item.id},
                     ),
                     child: Container(
                       width: 140,

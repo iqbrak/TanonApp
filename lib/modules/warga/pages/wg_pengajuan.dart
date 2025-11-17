@@ -186,7 +186,7 @@ class _WargaPengajuanPageState extends State<WargaPengajuanPage> {
       ),
 
       floatingActionButton: FloatingActionButton(
-        onPressed: () => context.go('/wg/pengajuan/add'),
+        onPressed: () => context.push('/wg/pengajuan/add'),
         backgroundColor: const Color(0xFF245BCA),
         child: const Icon(Icons.add, color: Colors.white),
       ),

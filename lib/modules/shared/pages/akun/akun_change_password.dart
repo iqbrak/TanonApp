@@ -17,7 +17,6 @@ class _AkunChangePasswordPageState extends State<AkunChangePasswordPage> {
   final _formKey = GlobalKey<FormState>();
   final _auth = FirebaseAuth.instance;
   final _authController = AuthController();
-  late String _defaultBackRoute;
 
   final TextEditingController oldPasswordController = TextEditingController();
   final TextEditingController newPasswordController = TextEditingController();
@@ -25,17 +24,6 @@ class _AkunChangePasswordPageState extends State<AkunChangePasswordPage> {
       TextEditingController();
 
   bool isLoading = false;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final extra = GoRouterState.of(context).extra;
-    if (extra != null && extra is Map<String, dynamic> && extra.containsKey('from')) {
-      _defaultBackRoute = extra['from'] as String;
-    } else {
-      _defaultBackRoute = '/${_authController.getRoutePrefix()}/akun';
-    }
-  }
 
   @override
   void dispose() {
@@ -66,7 +54,7 @@ class _AkunChangePasswordPageState extends State<AkunChangePasswordPage> {
       );
 
       Future.delayed(const Duration(milliseconds: 300), () {
-        if (mounted) context.go(_defaultBackRoute);
+        if (mounted) context.pop();
       });
 
     } on FirebaseAuthException catch (e) {
@@ -122,9 +110,7 @@ class _AkunChangePasswordPageState extends State<AkunChangePasswordPage> {
         elevation: 1,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Color(0xFF00194A)),
-          onPressed: () {
-            context.go(_defaultBackRoute);
-          },
+          onPressed: () { context.pop(); },
         ),
         title: Text(
           "Ubah Password",

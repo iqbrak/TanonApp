@@ -294,7 +294,7 @@ class _WargaPengajuanDetailPageState extends State<WargaPengajuanDetailPage> {
                                                         ),
                                                       ),
                                                     );
-                                                    context.go('/wg/pengajuan');
+                                                    context.pop();
                                                   }
                                                 },
                                                 child: Text('Batalkan Pengajuan',
@@ -344,7 +344,7 @@ class _WargaPengajuanDetailPageState extends State<WargaPengajuanDetailPage> {
               children: [
                 IconButton(
                   icon: const Icon(Icons.arrow_back, color: Colors.white),
-                  onPressed: () => context.go('/wg/pengajuan'),
+                  onPressed: () => context.pop(),
                 ),
                 Text('Detail Riwayat',
                     style: GoogleFonts.poppins(

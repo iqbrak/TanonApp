@@ -109,7 +109,7 @@ class AkunPage extends StatelessWidget {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Berhasil logout')),
                   );
-                  context.go('/auth/login');
+                  context.push('/auth/login');
                 },
                 icon: const Icon(Icons.logout, color: Colors.white),
                 label: Text(
@@ -173,7 +173,7 @@ class AkunPage extends StatelessWidget {
               ),
               trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
               onTap: () {
-                context.go(
+                context.push(
                   '/$routePrefix/akun/profil',
                   extra: {'from': '/$routePrefix/akun'},
                 );
@@ -192,7 +192,7 @@ class AkunPage extends StatelessWidget {
               ),
               trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
               onTap: () {
-                context.go(
+                context.push(
                   '/$routePrefix/akun/password',
                   extra: {'from': '/$routePrefix/akun'},
                 );
@@ -225,7 +225,7 @@ class AkunPage extends StatelessWidget {
                 ),
               ),
               trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
-              onTap: () => context.go('/pd/akun/desa'),
+              onTap: () => context.push('/pd/akun/desa'),
             ),
             const Divider(height: 1, color: Colors.grey),
             ListTile(
@@ -239,7 +239,7 @@ class AkunPage extends StatelessWidget {
                 ),
               ),
               trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
-              onTap: () => context.go('/pd/akun/aplikasi'),
+              onTap: () => context.push('/pd/akun/aplikasi'),
             ),
             const Divider(height: 1, color: Colors.grey),
             ListTile(
@@ -253,7 +253,7 @@ class AkunPage extends StatelessWidget {
                 ),
               ),
               trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
-              onTap: () => context.go('/pd/akun/panduan'),
+              onTap: () => context.push('/pd/akun/panduan'),
             ),
             const Divider(height: 1, color: Colors.grey),
             ListTile(
@@ -267,7 +267,7 @@ class AkunPage extends StatelessWidget {
                 ),
               ),
               trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
-              onTap: () => context.go('/pd/akun/pengaduan'),
+              onTap: () => context.push('/pd/akun/pengaduan'),
             ),
           ],
         ),

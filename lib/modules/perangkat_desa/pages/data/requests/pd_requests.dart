@@ -70,7 +70,7 @@ class _DesaDataRequestsPageState extends State<DesaDataRequestsPage> {
             children: [
               IconButton(
                 icon: const Icon(Icons.arrow_back, color: Color(0xFF00194A)),
-                onPressed: () => context.go('/pd/data'),
+                onPressed: () => context.pop(),
               ),
               const SizedBox(width: 8),
               Text(
