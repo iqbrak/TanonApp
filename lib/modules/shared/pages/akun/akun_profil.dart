@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../core/controllers/auth_controller.dart';
 import '../../../../core/controllers/user_controller.dart';
 
 class AkunProfilPage extends StatefulWidget {
@@ -17,7 +16,6 @@ class AkunProfilPage extends StatefulWidget {
 class _AkunProfilPageState extends State<AkunProfilPage> {
   final _auth = FirebaseAuth.instance;
   final _firestore = FirebaseFirestore.instance;
-  final _authController = AuthController();
 
   Map<String, dynamic>? _userData;
   bool _loading = true;

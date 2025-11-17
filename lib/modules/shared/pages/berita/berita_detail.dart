@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/controllers/news_controller.dart';
-import '../../../../core/controllers/auth_controller.dart';
 import '../../../../core/models/news.dart';
 import 'package:go_router/go_router.dart';
 
@@ -16,7 +15,6 @@ class BeritaDetailPage extends StatefulWidget {
 class _BeritaDetailPageState extends State<BeritaDetailPage> {
   News? news;
   final NewsController _newsController = NewsController();
-  final AuthController _authController = AuthController();
 
   @override
   void initState() {

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../core/controllers/auth_controller.dart';
 
 class AkunChangePasswordPage extends StatefulWidget {
   final String routePrefix;
@@ -16,7 +15,6 @@ class AkunChangePasswordPage extends StatefulWidget {
 class _AkunChangePasswordPageState extends State<AkunChangePasswordPage> {
   final _formKey = GlobalKey<FormState>();
   final _auth = FirebaseAuth.instance;
-  final _authController = AuthController();
 
   final TextEditingController oldPasswordController = TextEditingController();
   final TextEditingController newPasswordController = TextEditingController();

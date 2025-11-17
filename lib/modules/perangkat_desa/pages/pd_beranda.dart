@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../../core/controllers/user_controller.dart';
 import '../../../../../core/controllers/service_controller.dart';
 import '../../../../../core/controllers/news_controller.dart';
+import '../../../../../core/controllers/auth_controller.dart';
 import '../../../../../core/models/news.dart';
 
 class DesaBerandaPage extends StatelessWidget {
@@ -53,13 +54,19 @@ class DesaBerandaPage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 10),
-                Text(
-                  'Hai, Iqbra Kurniawan',
-                  style: GoogleFonts.poppins(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                  ),
+                FutureBuilder<String>(
+                  future: userController.getUsernameById(AuthController().currentUser!.uid),
+                  builder: (context, snapshot) {
+                    final name = snapshot.data ?? '';
+                    return Text(
+                      'Hai, $name',
+                      style: GoogleFonts.poppins(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    );
+                  },
                 ),
                 const SizedBox(height: 2),
                 Text(
