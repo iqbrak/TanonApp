@@ -23,7 +23,8 @@ import 'modules/perangkat_desa/pages/data/services/pd_services.dart';
 import 'modules/perangkat_desa/pages/data/services/pd_services_form.dart';
 import 'modules/perangkat_desa/pages/data/news/pd_news.dart';
 import 'modules/perangkat_desa/pages/data/news/pd_news_form.dart';
-import 'modules/perangkat_desa/pages/pd_data_requests.dart';
+import 'modules/perangkat_desa/pages/data/requests/pd_requests.dart';
+import 'modules/perangkat_desa/pages/data/requests/pd_requests_detail.dart';
 
 import 'modules/warga/wg_main.dart';
 import 'modules/warga/pages/wg_beranda.dart';
@@ -64,6 +65,13 @@ final GoRouter appRouter = GoRouter(
         GoRoute(path: '/pd/data/news/add', builder: (_, __) => const DesaDataNewsFormPage()),
         GoRoute(path: '/pd/data/news/edit', builder: (context, state) => DesaDataNewsFormPage(id: state.uri.queryParameters['id'])),
         GoRoute(path: '/pd/data/requests', builder: (_, __) => const DesaDataRequestsPage()),
+        GoRoute(
+          path: '/pd/data/requests/detail',
+          builder: (context, state) {
+            final extra = state.extra as Map<String, dynamic>;
+            return DesaDataRequestsDetailPage(id: extra['id']);
+          },
+        ),
 
         GoRoute(path: '/pd/berita', builder: (_, __) => BeritaPage()),
         GoRoute(
