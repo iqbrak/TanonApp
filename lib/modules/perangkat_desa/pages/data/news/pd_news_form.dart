@@ -84,7 +84,7 @@ class _DesaDataNewsFormPageState extends State<DesaDataNewsFormPage> {
 
     try {
       final currentUser = authController.currentUser;
-      String username = 'system';
+      String username = 'Admin';
 
       if (currentUser != null) {
         final userDoc = await FirebaseFirestore.instance
@@ -93,7 +93,7 @@ class _DesaDataNewsFormPageState extends State<DesaDataNewsFormPage> {
             .get();
 
         if (userDoc.exists) {
-          username = userDoc.data()?['username'] ?? 'system';
+          username = userDoc.data()?['username'] ?? 'Admin';
         }
       }
 
