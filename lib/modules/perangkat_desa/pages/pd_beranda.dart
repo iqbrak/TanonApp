@@ -5,12 +5,14 @@ import '../../../../../core/controllers/user_controller.dart';
 import '../../../../../core/controllers/service_controller.dart';
 import '../../../../../core/controllers/news_controller.dart';
 import '../../../../../core/controllers/auth_controller.dart';
+import '../../../../../core/controllers/request_controller.dart';
 import '../../../../../core/models/news.dart';
 
 class DesaBerandaPage extends StatelessWidget {
   final userController = UserController();
   final newsController = NewsController();
   final serviceController = ServiceController();
+  final requestController = RequestController();
   DesaBerandaPage({super.key});
 
   @override
@@ -163,13 +165,19 @@ class DesaBerandaPage extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: _buildSmallCard(
-                  context: context,
-                  iconPath: 'assets/images/ic_requests.png',
-                  title: 'Pengajuan',
-                  total: 12,
-                  color: const Color(0xFFCEDDFF),
-                  route: '/pd/data/requests',
+                child: StreamBuilder<int>(
+                  stream: requestController.getTotalRequests(),
+                  builder: (context, snapshot) {
+                    final total = snapshot.data ?? 0;
+                    return _buildSmallCard(
+                      context: context,
+                      iconPath: 'assets/images/ic_requests.png',
+                      title: 'Pengajuan',
+                      total: total,
+                      color: const Color(0xFFCEDDFF),
+                      route: '/pd/data/requests',
+                    );
+                  },
                 ),
               ),
               const SizedBox(width: 10),
