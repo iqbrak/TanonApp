@@ -151,4 +151,10 @@ class RequestController {
   Stream<int> getTotalRequests() {
     return getRequestsStream().map((list) => list.length);
   }
+
+  Stream<int> countRequestByStatus(String userId, String status) {
+    return getRequestsByUser(userId).map(
+      (list) => list.where((r) => r.status == status).length,
+    );
+  }
 }

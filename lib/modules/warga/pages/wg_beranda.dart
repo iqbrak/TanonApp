@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../../core/controllers/user_controller.dart';
-import '../../../../../core/controllers/service_controller.dart';
+import '../../../../../core/controllers/request_controller.dart';
 import '../../../../../core/controllers/news_controller.dart';
 import '../../../../../core/controllers/auth_controller.dart';
 import '../../../../../core/models/news.dart';
@@ -10,7 +10,7 @@ import '../../../../../core/models/news.dart';
 class WargaBerandaPage extends StatelessWidget {
   final userController = UserController();
   final newsController = NewsController();
-  final serviceController = ServiceController();
+  final requestController = RequestController();
   WargaBerandaPage({super.key});
 
   @override
@@ -106,95 +106,104 @@ class WargaBerandaPage extends StatelessWidget {
     );
   }
 
-  Widget _buildMainCard(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(30),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: StreamBuilder<int>(
-                  stream: userController.getTotalUsers(),
-                  builder: (context, snapshot) {
-                    final total = snapshot.data ?? 0;
-                    return _buildSmallCard(
-                      context: context,
-                      iconPath: 'assets/images/ic_users.png',
-                      title: 'Pengguna',
-                      total: total,
-                      color: const Color(0xFFCEDDFF),
-                      route: '/pd/data/users',
-                    );
-                  },
-                ),
+Widget _buildMainCard(BuildContext context) {
+  final userId = AuthController().currentUser!.uid;
+  final requestController = RequestController();
+
+  return Container(
+    padding: const EdgeInsets.all(20),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(30),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.08),
+          blurRadius: 8,
+          offset: const Offset(0, 3),
+        ),
+      ],
+    ),
+    child: Column(
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: StreamBuilder<int>(
+                stream: requestController.countRequestByStatus(userId, "Diproses"),
+                builder: (context, snapshot) {
+                  final total = snapshot.data ?? 0;
+                  return _buildSmallCard(
+                    context: context,
+                    iconPath: 'assets/images/ic_requests.png',
+                    title: 'Diproses',
+                    total: total,
+                    color: const Color(0xFFDDEBFF),
+                    route: '/wg/pengajuan',
+                  );
+                },
               ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: StreamBuilder<int>(
-                  stream: serviceController.getTotalServices(),
-                  builder: (context, snapshot) {
-                    final total = snapshot.data ?? 0;
-                    return _buildSmallCard(
-                      context: context,
-                      iconPath: 'assets/images/ic_services.png',
-                      title: 'Keperluan',
-                      total: total,
-                      color: const Color(0xFFCEDDFF),
-                      route: '/pd/data/services',
-                    );
-                  },
-                ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: StreamBuilder<int>(
+                stream: requestController.countRequestByStatus(userId, "Dibatalkan"),
+                builder: (context, snapshot) {
+                  final total = snapshot.data ?? 0;
+                  return _buildSmallCard(
+                    context: context,
+                    iconPath: 'assets/images/ic_requests.png',
+                    title: 'Dibatalkan',
+                    total: total,
+                    color: const Color(0xFFFFE8C6),
+                    route: '/wg/pengajuan',
+                  );
+                },
               ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Expanded(
-                child: _buildSmallCard(
-                  context: context,
-                  iconPath: 'assets/images/ic_requests.png',
-                  title: 'Pengajuan',
-                  total: 12,
-                  color: const Color(0xFFCEDDFF),
-                  route: '/data/requests',
-                ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            Expanded(
+              child: StreamBuilder<int>(
+                stream: requestController.countRequestByStatus(userId, "Ditolak"),
+                builder: (context, snapshot) {
+                  final total = snapshot.data ?? 0;
+                  return _buildSmallCard(
+                    context: context,
+                    iconPath: 'assets/images/ic_requests.png',
+                    title: 'Ditolak',
+                    total: total,
+                    color: const Color(0xFFFFD6D6),
+                    route: '/wg/pengajuan',
+                  );
+                },
               ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: StreamBuilder<int>(
-                  stream: newsController.getTotalNews(),
-                  builder: (context, snapshot) {
-                    final total = snapshot.data ?? 0;
-                    return _buildSmallCard(
-                      context: context,
-                      iconPath: 'assets/images/ic_news.png',
-                      title: 'Berita',
-                      total: total,
-                      color: const Color(0xFFCEDDFF),
-                      route: '/pd/data/news',
-                    );
-                  },
-                ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: StreamBuilder<int>(
+                stream: requestController.countRequestByStatus(userId, "Disetujui"),
+                builder: (context, snapshot) {
+                  final total = snapshot.data ?? 0;
+                  return _buildSmallCard(
+                    context: context,
+                    iconPath: 'assets/images/ic_requests.png',
+                    title: 'Disetujui',
+                    total: total,
+                    color: const Color(0xFFCFFFD0),
+                    route: '/wg/pengajuan',
+                  );
+                },
               ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
+            ),
+          ],
+        ),
+      ],
+    ),
+  );
+}
 
   Widget _buildSmallCard({
     required BuildContext context,
@@ -215,7 +224,7 @@ class WargaBerandaPage extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Image.asset(iconPath, width: 30, height: 30),
+            Image.asset(iconPath, width: 45, height: 45),
             const SizedBox(width: 10),
             Expanded(
               child: Column(
